@@ -221,13 +221,24 @@ class Powerup(pygame.sprite.Sprite):
         self.jumpCount = 1.2
 
     def update(self):
-        if self.jumpCount >= -2:
+        # Checking if the powerup is out of the screen or on it
+        if self.rect.y >= 0:
+            if self.jumpCount >= -2:
 
-            self.jumpCount -= 0.1
-            self.rect.y -= (self.jumpCount * abs(self.jumpCount)) * 0.5
+                self.jumpCount -= 0.1
+                self.rect.y -= (self.jumpCount * abs(self.jumpCount)) * 0.5
+            else:
+                self.jumpCount = 1.2
+                self.rect.bottom = self.plat.rect.top - 2
+        # Else if the powerup is above the screen we change the signs
         else:
-            self.jumpCount = 1.2
-            self.rect.bottom = self.plat.rect.top - 2
+            if self.jumpCount >= 2:
+
+                self.jumpCount -= 0.1
+                self.rect.y += (self.jumpCount * abs(self.jumpCount)) * 0.5
+            else:
+                self.jumpCount = 1.2
+                self.rect.bottom = self.plat.rect.top - 2
 
         if not self.game.platforms.has(self.plat):
             self.kill()
