@@ -126,13 +126,19 @@ class Game:
             if random.randrange(100) < CLOUD_SPAWN_RATIO:
                 Cloud(self)
             self.player.pos.y += max(abs(self.player.vel.y), 3)
+            # Move the clouds further down
             for cloud in self.clouds:
                 cloud.rect.y += max(abs(self.player.vel.y / 2), 1.5)
+            # Move the platforms further down
             for plat in self.platforms:
                 plat.rect.y += max(abs(self.player.vel.y), 3)
                 if plat.rect.top >= HEIGHT:
                     plat.kill()
                     self.score += 10
+            # Move the powerups further down(code differs because their vel is always changing)
+            for pow in self.powerups:
+                pow.rect.y += max(abs(self.player.vel.y), 3) + pow.jumpCount
+            # Move the mobs further down
             for mob in self.mobs:
                 mob.rect.y += max(abs(self.player.vel.y), 3)
 
