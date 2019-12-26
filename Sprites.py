@@ -235,7 +235,7 @@ class Powerup(pygame.sprite.Sprite):
             if self.jumpCount >= 2:
 
                 self.jumpCount -= 0.1
-                self.rect.y += (self.jumpCount * abs(self.jumpCount)) * 0.5
+                self.rect.y -= (self.jumpCount * abs(self.jumpCount)) * 0.5
             else:
                 self.jumpCount = 1.2
                 self.rect.bottom = self.plat.rect.top - 2
