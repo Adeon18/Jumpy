@@ -7,7 +7,9 @@ FPS = 60
 FONT_NAME = 'Long Cang'
 SAVES_FILE = 'Saves'
 COIN_FILE = 'coins'
-SPRITESHEET = 'spritesheet_jumper.png'
+SPRITESHEET1 = 'spritesheet_jumper.png'
+
+
 
 # Player properties
 PLAYER_ACC = 0.5
@@ -18,7 +20,7 @@ PLAYER_JUMP_V = 20
 
 # Game properties
 BOOST_POWER = 40
-POWERUP_SPAWN_RATIO = 35
+POWERUP_SPAWN_RATIO = 10
 CLOUD_SPAWN_RATIO = 10
 COIN_SPAWN_RATIO = 5
 SPIKEY_SPAWN_RATIO = 10

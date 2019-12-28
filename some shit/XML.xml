@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with TexturePacker https://www.codeandweb.com/texturepacker -->
+<!-- $TexturePacker:SmartUpdate:c6bb9a454eb0541c5a89180f49d113cb:912fc5cf60c9f3e00a47da88529b7147:0e84e3c7d08c87077db67ef98f8c3c9b$ -->
+<TextureAtlas imagePath="Spritesheet2.png" width="1024" height="2048">
+    <sprite n="SPritesheeet.png" x="0" y="0" w="1024" h="2048"/>
+	<SubTexture name="bunny1_stand.png" x="0" y="0" w="125" h="205"/>
+	<SubTexture name="bunny1_ready.png" x="128" y="0" w="124" h="194"/>
+	<SubTexture name="bunny1_walk1.png" x="256" y="0" w="123" h="209"/>
+	<SubTexture name="bunny1_walk2.png" x="383" y="0" w="122" h="203"/>
+</TextureAtlas>

@@ -39,7 +39,7 @@ class Game:
                 self.coin_count = 0
 
         # Load spritesheet image
-        self.spritesheet = Spritesheet(path.join(self.dir, SPRITESHEET))
+        self.spritesheet1 = Spritesheet1(path.join(self.dir, SPRITESHEET1))
         img_dir = path.join(self.dir, 'images')
 
         # Cloud images
@@ -95,9 +95,14 @@ class Game:
 
         # Hit mobs
         mob_hits = pygame.sprite.spritecollide(self.player, self.mobs, False)
-        if mob_hits:
+        if mob_hits and not self.player.invincible:
             if pygame.sprite.spritecollide(self.player, self.mobs, False, pygame.sprite.collide_mask):
                 self.playing = False
+        if self.player.invincible:
+            time_passed1 = pygame.time.get_ticks()
+            if time_passed1 - self.player.last_invincible > 7000:
+                self.player.last_invincible = time_passed1
+                self.player.invincible = False
 
         # check if player hits a platform - only if falling
         if self.player.vel.y > 0:
@@ -108,8 +113,7 @@ class Game:
                     if hit.rect.bottom > lowest_plat.rect.bottom:
                         lowest_plat = hit
 
-                if self.player.pos.x < lowest_plat.rect.right + 10 and \
-                    self.player.pos.x > lowest_plat.rect.left - 10:
+                if lowest_plat.rect.left - 10 < self.player.pos.x < lowest_plat.rect.right + 10:
                     if self.player.pos.y < lowest_plat.rect.centery - 3:
                         self.player.pos.y = lowest_plat.rect.top
                         self.player.vel.y = 0
@@ -151,11 +155,15 @@ class Game:
 
         # Player/Powerup hits
         powerup_hits = pygame.sprite.spritecollide(self.player, self.powerups, True)
-        for pow in powerup_hits:
-            if pow.type == 'boost':
+        for hit in powerup_hits:
+            if hit.type == 'boost':
                 self.boost_sound.play()
                 self.player.vel.y = -BOOST_POWER
                 self.player.jumping = False
+            elif hit.type == 'shield':
+                self.player.invincible = True
+
+
 
         # DIE!!!!
         if self.player.rect.bottom > HEIGHT:
