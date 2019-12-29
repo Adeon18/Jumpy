@@ -20,6 +20,7 @@
   <component name="ProjectId" id="1Pn8bDY8yPTLKBEakeJiK5sWSi8" />
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="ToolWindowStructure.ShowToolbar" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../project ШАГ/players.py" />
   </component>
   <component name="RecentsManager">

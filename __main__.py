@@ -54,6 +54,7 @@ class Game:
     def new(self):
         # start a new game
         self.score = 0
+        self.score_inv = 0
         self.all_sprites = pygame.sprite.LayeredUpdates()
         self.platforms = pygame.sprite.Group()
         self.powerups = pygame.sprite.Group()
@@ -98,11 +99,12 @@ class Game:
         if mob_hits and not self.player.invincible:
             if pygame.sprite.spritecollide(self.player, self.mobs, False, pygame.sprite.collide_mask):
                 self.playing = False
+        # Bubble mechanics
         if self.player.invincible:
-            time_passed1 = pygame.time.get_ticks()
-            if time_passed1 - self.player.last_invincible > 7000:
-                self.player.last_invincible = time_passed1
+            self.player.vel.y = -BUBBLE_POWER
+            if self.score_inv >= 150:
                 self.player.invincible = False
+
 
         # check if player hits a platform - only if falling
         if self.player.vel.y > 0:
@@ -139,6 +141,8 @@ class Game:
                 if plat.rect.top >= HEIGHT:
                     plat.kill()
                     self.score += 10
+                    if self.player.invincible:
+                        self.score_inv += 10
             # Move the powerups further down(code differs because their vel is always changing)
             for pow in self.powerups:
                 pow.rect.y += max(abs(self.player.vel.y), 3) + pow.jumpCount
@@ -160,8 +164,12 @@ class Game:
                 self.boost_sound.play()
                 self.player.vel.y = -BOOST_POWER
                 self.player.jumping = False
-            elif hit.type == 'shield':
+            elif hit.type == 'bubble':
                 self.player.invincible = True
+                self.player.jumping = False
+                self.score_inv = 0
+
+
 
 
 

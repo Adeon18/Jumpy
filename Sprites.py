@@ -245,7 +245,7 @@ class Platform(pygame.sprite.Sprite):
         self.rect.y = y
 
         # Applying the sprites spawning on platform
-        if random.randrange(100) < POWERUP_SPAWN_RATIO:
+        if random.randrange(100) < POWERUP_SPAWN_RATIO and not game.player.invincible:
             Powerup(self.game, self)
         if random.randrange(100) < COIN_SPAWN_RATIO:
             Coin(self.game, self)
@@ -259,10 +259,10 @@ class Powerup(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.plat = plat
-        self.type = choice(['boost', 'shield'])
+        self.type = choice(['boost', 'bubble'])
         if self.type == 'boost':
             self.image = self.game.spritesheet1.get_image(820, 1805, 71, 70)
-        elif self.type == 'shield':
+        elif self.type == 'bubble':
             self.image = self.game.spritesheet1.get_image(826, 134, 71, 70)
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
