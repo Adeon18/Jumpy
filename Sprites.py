@@ -251,6 +251,8 @@ class Platform(pygame.sprite.Sprite):
             Coin(self.game, self)
         if random.randrange(100) < SPIKEY_SPAWN_RATIO and self.image == normal_images[0]:
             Spikey(self.game, self)
+        if random.randrange(100) < CLOUD_SPAWN_RATIO:
+            Cloud(self.game, self)
 
 class Powerup(pygame.sprite.Sprite):
     def __init__(self, game, plat):
@@ -377,7 +379,8 @@ class Mob(pygame.sprite.Sprite):
         if self.rect.centery > HEIGHT + 100:
             self.kill()
 
-class Cloud(pygame.sprite.Sprite):
+
+class Cloud_bg(pygame.sprite.Sprite):
     def __init__(self, game):
         self._layer = CLOUD_LAYER
         self.groups = game.all_sprites, game.clouds
@@ -394,6 +397,7 @@ class Cloud(pygame.sprite.Sprite):
     def update(self):
         if self.rect.top > HEIGHT * 2:
             self.kill()
+
 
 class Spikey(pygame.sprite.Sprite):
     def __init__(self, game, plat):
@@ -451,6 +455,68 @@ class Spikey(pygame.sprite.Sprite):
             self.rect.centerx = centerx
             self.rect.bottom = rect_bottom
 
+
+class Cloud(pygame.sprite.Sprite):
+    def __init__(self, game, plat):
+        self._layer = 4
+        self.groups = game.all_sprites, game.passive_mobs
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.plat = plat
+        # Defining the images
+        self.images = [self.game.spritesheet1.get_image(0, 1152, 260, 134),
+                       Resize.get_image(self, pygame.image.load('graphics/Cloud1.png'), 260, 134),
+                       Resize.get_image(self, pygame.image.load('graphics/Cloud2.png'), 260, 134),
+                       Resize.get_image(self, pygame.image.load('graphics/Cloud3.png'), 260, 134),
+                       Resize.get_image(self, pygame.image.load('graphics/Cloud4.png'), 260, 134)]
+        self.image = self.images[0]
+        self.rect = self.image.get_rect()
+        self.rect.centerx = plat.rect.centerx
+        self.rect.bottom = plat.rect.top - 60
+        self.last_update = 0
+        self.last_struck = False
+        self.current_frame = 0
+        # The first image is from the spritesheet so we set the colorkey to black
+        if self.image == self.images[0]:
+            self.image.set_colorkey(BLACK)
+
+
+    def update(self, *args):
+        # Setting the animation
+        time_passed = pygame.time.get_ticks()
+        if time_passed - self.last_update > 500:
+            self.last_update = time_passed
+            self.current_frame = (self.current_frame + 1) % len(self.images)
+            self.image = self.images[self.current_frame]
+        # Spawning the lightining at the peak image
+        if self.image == self.images[4]:
+            Lightining(self.game, self)
+
+
+
+class Lightining(pygame.sprite.Sprite):
+    def __init__(self, game, cloud):
+        self._layer = MOB_LAYER
+        self.groups = game.all_sprites, game.mobs
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.cloud = cloud
+        self.image = self.game.spritesheet1.get_image(895, 453, 55, 114)
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        # self.pos = choice(['left', 'center', 'right'])
+        self.rect.top = self.cloud.rect.bottom - 2
+        self.rect.centerx = self.cloud.rect.centerx - 5
+        """if self.pos == 'left':
+            self.rect.left = self.cloud.rect.left + 10
+        elif self.pos == 'center':
+            self.rect.centerx = self.cloud.rect.centerx
+        else:
+            self.rect.right = self.cloud.rect.right - 10"""
+    def update(self, *args):
+        # Kill if the peak image is gone
+        if self.cloud.image != self.cloud.images[4]:
+            self.kill()
 
 
 

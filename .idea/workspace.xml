@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="4afb16a7-f2ef-4604-b7de-85a7a2e01c2a" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Saves" beforeDir="false" afterPath="$PROJECT_DIR$/Saves" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Sprites.py" beforeDir="false" afterPath="$PROJECT_DIR$/Sprites.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/__main__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coins" beforeDir="false" afterPath="$PROJECT_DIR$/coins" afterDir="false" />
@@ -21,7 +22,7 @@
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="ToolWindowStructure.ShowToolbar" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../project ШАГ/players.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../project ШАГ/__main__.py" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">

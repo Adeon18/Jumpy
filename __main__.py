@@ -60,6 +60,7 @@ class Game:
         self.powerups = pygame.sprite.Group()
         self.coins = pygame.sprite.Group()
         self.mobs = pygame.sprite.Group()
+        self.passive_mobs = pygame.sprite.Group()
         self.clouds = pygame.sprite.Group()
         self.player = Player(self)
         for plat in PLATFORM_LIST:
@@ -67,7 +68,7 @@ class Game:
         self.mob_timer = 0
         pygame.mixer.music.load(path.join(self.sound_dir, 'Happy Tune.ogg'))
         for i in range(10):
-            c = Cloud(self)
+            c = Cloud_bg(self)
             c.rect.y += 500
         self.run()
 
@@ -85,8 +86,6 @@ class Game:
     def update(self):
         # Game Loop - Update
         self.all_sprites.update()
-
-
 
         # Spawn a mob?
         time_passed = pygame.time.get_ticks()
@@ -129,8 +128,8 @@ class Game:
 
         # if player reaches the 1/4 of the screen
         if self.player.rect.top <= HEIGHT / 3:
-            if random.randrange(100) < CLOUD_SPAWN_RATIO:
-                Cloud(self)
+            if random.randrange(100) < CLOUD_BG_SPAWN_RATIO:
+                Cloud_bg(self)
             self.player.pos.y += max(abs(self.player.vel.y), 3)
             # Move the clouds further down
             for cloud in self.clouds:
@@ -149,6 +148,9 @@ class Game:
             # Move the mobs further down
             for mob in self.mobs:
                 mob.rect.y += max(abs(self.player.vel.y), 3)
+            for passive_mob in self.passive_mobs:
+                passive_mob.rect.y += max(abs(self.player.vel.y), 3)
+
 
 
 
