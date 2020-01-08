@@ -40,7 +40,7 @@ class Player(pygame.sprite.Sprite):
         self.last_invincible = 0
         self.last_update = 0
         self.load_images()
-        self.image = self.standing_frames[0]
+        self.image = self.standing_frames[1]
         self.rect = self.image.get_rect()
         self.rect.center = (40, HEIGHT - 100)
         self.pos = vec(40, HEIGHT - 100)
@@ -224,7 +224,7 @@ class Platform(pygame.sprite.Sprite):
             else:
                 self.type = 'snowy'
             #self.type = choice(['pink', 'snowy'])
-        if 10000 > self.game.score >= 1000:
+        if self.game.score >= 1000:
             self.type = choice(['snowy'])
 
         # Platform images attachment
@@ -273,6 +273,7 @@ class Powerup(pygame.sprite.Sprite):
         self.jumpCount = 1.2
 
     def update(self):
+        self.rect.centerx = self.plat.rect.centerx
         # Checking if the powerup is out of the screen or on it
         if self.rect.y >= 0:
             if self.jumpCount >= -2:
@@ -471,8 +472,8 @@ class Cloud(pygame.sprite.Sprite):
                        Resize.get_image(self, pygame.image.load('graphics/Cloud4.png'), 260, 134)]
         self.image = self.images[0]
         self.rect = self.image.get_rect()
-        self.rect.centerx = plat.rect.centerx
-        self.rect.bottom = plat.rect.top - 60
+        self.rect.centerx = self.plat.rect.centerx
+        self.rect.bottom = self.plat.rect.top - 60
         self.last_update = 0
         self.last_struck = False
         self.current_frame = 0

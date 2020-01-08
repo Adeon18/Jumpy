@@ -140,6 +140,7 @@ class Game:
                 if plat.rect.top >= HEIGHT:
                     plat.kill()
                     self.score += 10
+                    # We add value to this score so we can monitor the bubble
                     if self.player.invincible:
                         self.score_inv += 10
             # Move the powerups further down(code differs because their vel is always changing)
@@ -187,8 +188,13 @@ class Game:
         # spawn new platforms to keep the game runnin'
         while len(self.platforms) < 6:
             p_width = random.randrange(50, 100)
-            Platform(self, random.randrange(3, WIDTH - p_width),
+            plat = Platform(self, random.randrange(3, WIDTH - p_width),
                          random.randrange(-75, -30))
+            # If the platform is beyond the screen we adjust it's pos
+            if plat.rect.right > WIDTH:
+                plat.rect.right = WIDTH - 5
+            elif plat.rect.left < 0:
+                plat.rect.left = 5
         # Fading the screen when the player hits some score
         #if self.score == 100:
             #self.fade(WIDTH, HEIGHT)
@@ -220,7 +226,7 @@ class Game:
             self.screen.fill((140, 156, 166))
         if 1000 > self.score >= 750:
             self.screen.fill((215, 122, 255))
-        if 10000 > self.score >= 1000:
+        if self.score >= 1000:
             self.screen.fill((215, 222, 255))
         self.all_sprites.draw(self.screen)
         self.draw_text(str(self.score), 32, BLACK, WIDTH / 2, 15)
