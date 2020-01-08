@@ -483,6 +483,7 @@ class Cloud(pygame.sprite.Sprite):
 
 
     def update(self, *args):
+        self.rect.centerx = self.plat.rect.centerx
         # Setting the animation
         time_passed = pygame.time.get_ticks()
         if time_passed - self.last_update > 500:
