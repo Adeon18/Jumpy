@@ -27,6 +27,28 @@ class Resize:
         image = pygame.transform.scale(image, (width // 2, height // 2))
         return image
 
+class Button(pygame.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.menu
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = self.game.spritesheet1.get_image(0, 96, 380, 94)
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.game.screen.blit(self.image, self.rect)
+
+
+    def draw_txt(self, text, size, color):
+        font = pygame.font.Font(self.game.font_name, size)
+        text_surface = font.render(text, True, color)
+        text_rect = text_surface.get_rect()
+        text_rect.center = self.rect.center
+        self.game.screen.blit(text_surface, text_rect)
+
+    def update(self):
+        pygame.transform.scale(self.image, (380 * 2, 94 * 2))
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, game):
         self._layer = PLAYER_LAYER

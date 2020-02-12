@@ -21,6 +21,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         self.font_name = pygame.font.match_font(FONT_NAME)
+        self.menu = pygame.sprite.Group()
         self.load_data()
 
     def load_data(self):
@@ -41,6 +42,10 @@ class Game:
         # Load spritesheet image
         self.spritesheet1 = Spritesheet1(path.join(self.dir, SPRITESHEET1))
         img_dir = path.join(self.dir, 'images')
+        # Button images
+        self.menu_b1 = Button(self, WIDTH // 2, HEIGHT // 2 + 56)
+        self.menu_b2 = Button(self, WIDTH // 2, HEIGHT // 2 + 56 * 2)
+        self.menu_b3 = Button(self, WIDTH // 2, HEIGHT // 2 + 56 * 3)
 
         # Cloud images
         self.cloud_images = []
@@ -215,6 +220,7 @@ class Game:
                 if event.key == pygame.K_w:
                     self.player.jump_cut()
 
+
     def draw(self):
         # Game Loop - draw
         # Screen color change
@@ -238,14 +244,31 @@ class Game:
         # game splash/start screen
         #pygame.mixer.music.load(path.join(self.sound_dir, 'Yippee.ogg'))
         #pygame.mixer.music.play(loops=-1)
-        self.screen.fill(BG_COLOR)
+        self.screen.fill((140, 156, 166))
         self.draw_text(TITLE, 68, WHITE, WIDTH / 2, HEIGHT / 4)
-        self.draw_text('A/D to move, W to jump', 32, WHITE, WIDTH / 2, HEIGHT / 2)
-        self.draw_text('Press a key to play', 32, WHITE, WIDTH / 2, HEIGHT * 3 / 4)
+        self.menu.draw(self.screen)
+        self.menu_b1.draw_txt('Play', 32, WHITE)
+        self.menu_b2.draw_txt('Tutorial', 32, WHITE)
+        self.menu_b3.draw_txt('Settings', 32, WHITE)
+
+
         self.draw_text('High score :' + str(self.highscore), 32, WHITE, WIDTH / 2, 15)
         pygame.display.flip()
-        self.wait_for_key()
+        self.wait_for_key_menu()
         pygame.mixer.music.fadeout(500)
+
+    def show_tutorial_screen(self):
+        self.screen.fill((140, 156, 166))
+        # Giving tutorial
+        self.draw_text('Jumpy!', 72, WHITE, WIDTH / 2, HEIGHT / 10)
+        self.draw_text('A/D to move, W to jump', 32, WHITE, WIDTH / 2, HEIGHT / 3)
+        self.draw_text('Watch out for snowy platforms!', 32, WHITE, WIDTH / 2, HEIGHT / 3 + 36)
+        self.draw_text('Collect coins and exchange them for goods!', 32, WHITE, WIDTH / 2, HEIGHT / 3 + 36 * 2)
+        self.draw_text('Good Luck!:)', 32, WHITE, WIDTH / 2, HEIGHT / 2)
+        # Creating a button
+        self.tut_b = Button(self, WIDTH // 2, HEIGHT // 2 + 56 * 4)
+        self.tut_b.draw_txt('Go back', 32, WHITE)
+        pygame.display.flip()
 
     def show_go_screen(self):
         # game over/continue
@@ -253,29 +276,35 @@ class Game:
             return
         #pygame.mixer.music.load(path.join(self.sound_dir, 'Yippee.ogg'))
         #pygame.mixer.music.play(loops=-1)
-        self.screen.fill(BG_COLOR)
+        self.screen.fill((140, 156, 166))
         self.draw_text('GAME OVER', 68, WHITE, WIDTH / 2, HEIGHT / 4)
-        self.draw_text('Score :' + str(self.score), 32, WHITE, WIDTH / 2, HEIGHT / 2)
-        self.draw_text('Press a key to play again', 32, WHITE, WIDTH / 2, HEIGHT * 3 / 4)
-
+        self.draw_text('Score :' + str(self.score), 32, WHITE, WIDTH / 2, HEIGHT / 4 + 36)
+        # Adjusting the buttons
+        self.goscr_b1 = Button(self, WIDTH // 2, HEIGHT // 2 + 56)
+        self.goscr_b2 = Button(self, WIDTH // 2, HEIGHT // 2 + 56 * 2)
+        self.goscr_b3 = Button(self, WIDTH // 2, HEIGHT // 2 + 56 * 3)
+        self.goscr_b1.draw_txt('Play again', 32, WHITE)
+        self.goscr_b2.draw_txt('Return to menu', 32, WHITE)
+        self.goscr_b3.draw_txt('Exit', 32, WHITE)
         # Draw the highscore count
         if self.score > self.highscore:
             self.highscore = self.score
-            self.draw_text('New high score!', 32, WHITE, WIDTH / 2, HEIGHT / 2 + 40)
+            self.draw_text('New high score!', 32, WHITE, WIDTH / 2, HEIGHT / 4 + 36 * 2)
             with open(path.join(self.dir, SAVES_FILE), 'w',) as f:
                 f.write(str(self.score))
         else:
-            self.draw_text('High score :' + str(self.highscore), 32, WHITE, WIDTH / 2, HEIGHT / 2 + 40)
+            self.draw_text('High score :' + str(self.highscore), 32, WHITE, WIDTH / 2, HEIGHT / 4 + 36 * 2)
 
         with open(path.join(self.dir, COIN_FILE), 'w',) as f:
             f.write(str(self.coin_count))
 
         # Draw the coin count
         pygame.display.flip()
-        self.wait_for_key()
+        self.wait_for_key_goscr()
         pygame.mixer.music.fadeout(500)
 
-    def wait_for_key(self):
+    def wait_for_key_menu(self):
+        pygame.mouse.set_visible(True)
         waiting = True
         while waiting:
             self.clock.tick(FPS)
@@ -283,8 +312,41 @@ class Game:
                 if event.type == pygame.QUIT:
                     waiting = False
                     self.running = False
-                if event.type == pygame.KEYUP:
+                # Getting the mouse pos and checking the button clicks
+                pos = pygame.mouse.get_pos()
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if self.menu_b1.rect.collidepoint(pos):
+                        waiting = False
+                        pygame.mouse.set_visible(False)
+                    elif self.menu_b2.rect.collidepoint(pos):
+                        self.show_tutorial_screen()
+                    if self.tut_b.rect.collidepoint(pos):
+                        waiting = False
+                        self.tut_b.kill()
+                        self.show_start_screen()
+
+
+    def wait_for_key_goscr(self):
+        pygame.mouse.set_visible(True)
+        waiting = True
+        while waiting:
+            self.clock.tick(FPS)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
                     waiting = False
+                    self.running = False
+                # Getting the pos and checking the button clicks
+                pos = pygame.mouse.get_pos()
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if self.goscr_b1.rect.collidepoint(pos):
+                        waiting = False
+                        pygame.mouse.set_visible(False)
+                    if self.goscr_b2.rect.collidepoint(pos):
+                        waiting = False
+                        self.show_start_screen()
+                    elif self.goscr_b3.rect.collidepoint(pos):
+                        waiting = False
+                        self.running = False
 
     def draw_text(self, text, size, color, x, y):
         font = pygame.font.Font(self.font_name, size)
@@ -292,7 +354,6 @@ class Game:
         text_rect = text_surface.get_rect()
         text_rect.center = (x, y)
         self.screen.blit(text_surface, text_rect)
-
 
 
     """def fade(self, WIDTH, HEIGHT):
