@@ -320,7 +320,7 @@ class Game:
                         pygame.mouse.set_visible(False)
                     elif self.menu_b2.rect.collidepoint(pos):
                         self.show_tutorial_screen()
-                    if self.tut_b.rect.collidepoint(pos):
+                    elif self.tut_b.rect.collidepoint(pos):
                         waiting = False
                         self.tut_b.kill()
                         self.show_start_screen()
