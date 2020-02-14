@@ -46,6 +46,7 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 LIGHTBLUE = (68, 142, 249)
+ALMOST_WHITE = (226, 246, 247)
 BG_COLOR = LIGHTBLUE
 
 # Time properties

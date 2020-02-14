@@ -42,11 +42,12 @@ class Game:
         # Load spritesheet image
         self.spritesheet1 = Spritesheet1(path.join(self.dir, SPRITESHEET1))
         img_dir = path.join(self.dir, 'images')
+        # Bg images
+        self.bg_menu = pygame.image.load('bg_menu.png')
         # Button images
         self.menu_b1 = Button(self, WIDTH // 2, HEIGHT // 2 + 56)
         self.menu_b2 = Button(self, WIDTH // 2, HEIGHT // 2 + 56 * 2)
         self.menu_b3 = Button(self, WIDTH // 2, HEIGHT // 2 + 56 * 3)
-
         # Cloud images
         self.cloud_images = []
         for i in range(1,4):
@@ -244,30 +245,28 @@ class Game:
         # game splash/start screen
         #pygame.mixer.music.load(path.join(self.sound_dir, 'Yippee.ogg'))
         #pygame.mixer.music.play(loops=-1)
-        self.screen.fill((140, 156, 166))
-        self.draw_text(TITLE, 68, WHITE, WIDTH / 2, HEIGHT / 4)
+        self.screen.blit(self.bg_menu, (0, 0))
+        self.draw_text(TITLE, 68, ALMOST_WHITE, WIDTH / 2, HEIGHT / 4)
         self.menu.draw(self.screen)
-        self.menu_b1.draw_txt('Play', 32, WHITE)
-        self.menu_b2.draw_txt('Tutorial', 32, WHITE)
-        self.menu_b3.draw_txt('Settings', 32, WHITE)
-
-
-        self.draw_text('High score :' + str(self.highscore), 32, WHITE, WIDTH / 2, 15)
+        self.menu_b1.draw_txt('Play', 32, ALMOST_WHITE)
+        self.menu_b2.draw_txt('Tutorial', 32, ALMOST_WHITE)
+        self.menu_b3.draw_txt('Settings', 32, ALMOST_WHITE)
+        self.draw_text('High score :' + str(self.highscore), 32, ALMOST_WHITE, WIDTH / 2, 15)
         pygame.display.flip()
         self.wait_for_key_menu()
         pygame.mixer.music.fadeout(500)
 
     def show_tutorial_screen(self):
-        self.screen.fill((140, 156, 166))
+        self.screen.blit(self.bg_menu, (0, 0))
         # Giving tutorial
-        self.draw_text('Jumpy!', 72, WHITE, WIDTH / 2, HEIGHT / 10)
-        self.draw_text('A/D to move, W to jump', 32, WHITE, WIDTH / 2, HEIGHT / 3)
-        self.draw_text('Watch out for snowy platforms!', 32, WHITE, WIDTH / 2, HEIGHT / 3 + 36)
-        self.draw_text('Collect coins and exchange them for goods!', 32, WHITE, WIDTH / 2, HEIGHT / 3 + 36 * 2)
-        self.draw_text('Good Luck!:)', 32, WHITE, WIDTH / 2, HEIGHT / 2)
+        self.draw_text('Jumpy!', 72, ALMOST_WHITE, WIDTH / 2, HEIGHT / 10)
+        self.draw_text('A/D to move, W to jump', 32, (0,102,133), WIDTH / 2, HEIGHT / 3)
+        self.draw_text('Watch out for snowy platforms!', 32, (0,102,133), WIDTH / 2, HEIGHT / 3 + 36)
+        self.draw_text('Collect coins and exchange them for goods!', 32, (0,102,133), WIDTH / 2, HEIGHT / 3 + 36 * 2)
+        self.draw_text('Good Luck!:)', 32, (0,102,133), WIDTH / 2, HEIGHT / 2)
         # Creating a button
         self.tut_b = Button(self, WIDTH // 2, HEIGHT // 2 + 56 * 4)
-        self.tut_b.draw_txt('Go back', 32, WHITE)
+        self.tut_b.draw_txt('Go back', 32, ALMOST_WHITE)
         pygame.display.flip()
 
     def show_go_screen(self):
@@ -276,24 +275,24 @@ class Game:
             return
         #pygame.mixer.music.load(path.join(self.sound_dir, 'Yippee.ogg'))
         #pygame.mixer.music.play(loops=-1)
-        self.screen.fill((140, 156, 166))
-        self.draw_text('GAME OVER', 68, WHITE, WIDTH / 2, HEIGHT / 4)
-        self.draw_text('Score :' + str(self.score), 32, WHITE, WIDTH / 2, HEIGHT / 4 + 36)
+        self.screen.blit(self.bg_menu, (0, 0))
+        self.draw_text('GAME OVER', 68, ALMOST_WHITE, WIDTH / 2, HEIGHT / 5)
+        self.draw_text('Score :' + str(self.score), 32, ALMOST_WHITE, WIDTH / 2, HEIGHT / 5 + 36)
         # Adjusting the buttons
         self.goscr_b1 = Button(self, WIDTH // 2, HEIGHT // 2 + 56)
         self.goscr_b2 = Button(self, WIDTH // 2, HEIGHT // 2 + 56 * 2)
         self.goscr_b3 = Button(self, WIDTH // 2, HEIGHT // 2 + 56 * 3)
-        self.goscr_b1.draw_txt('Play again', 32, WHITE)
-        self.goscr_b2.draw_txt('Return to menu', 32, WHITE)
-        self.goscr_b3.draw_txt('Exit', 32, WHITE)
+        self.goscr_b1.draw_txt('Play again', 32, ALMOST_WHITE)
+        self.goscr_b2.draw_txt('Return to menu', 32, ALMOST_WHITE)
+        self.goscr_b3.draw_txt('Exit', 32, ALMOST_WHITE)
         # Draw the highscore count
         if self.score > self.highscore:
             self.highscore = self.score
-            self.draw_text('New high score!', 32, WHITE, WIDTH / 2, HEIGHT / 4 + 36 * 2)
+            self.draw_text('New high score!', 32, ALMOST_WHITE, WIDTH / 2, HEIGHT / 5 + 36 * 2)
             with open(path.join(self.dir, SAVES_FILE), 'w',) as f:
                 f.write(str(self.score))
         else:
-            self.draw_text('High score :' + str(self.highscore), 32, WHITE, WIDTH / 2, HEIGHT / 4 + 36 * 2)
+            self.draw_text('High score :' + str(self.highscore), 32, ALMOST_WHITE, WIDTH / 2, HEIGHT / 5 + 36 * 2)
 
         with open(path.join(self.dir, COIN_FILE), 'w',) as f:
             f.write(str(self.coin_count))
