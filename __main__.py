@@ -48,6 +48,7 @@ class Game:
         self.menu_b1 = Button(self, WIDTH // 2, HEIGHT // 2 + 56)
         self.menu_b2 = Button(self, WIDTH // 2, HEIGHT // 2 + 56 * 2)
         self.menu_b3 = Button(self, WIDTH // 2, HEIGHT // 2 + 56 * 3)
+        self.tut_b = Button(self, WIDTH // 2, HEIGHT // 2 + 56 * 3)
         # Cloud images
         self.cloud_images = []
         for i in range(1,4):
