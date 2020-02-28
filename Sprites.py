@@ -210,6 +210,11 @@ class Platform(pygame.sprite.Sprite):
         self.groups = game.all_sprites, game.platforms
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
+        self.on_move = False
+        self.vel_x = 1
+        self.vel_y = 0
+        if random.randrange(100) < 5:
+            self.on_move = True
         # Platform images
         snowy_images = [self.game.spritesheet1.get_image(0, 768, 380, 94),
                         self.game.spritesheet1.get_image(213, 1764, 201, 100)]
@@ -265,10 +270,18 @@ class Platform(pygame.sprite.Sprite):
             Powerup(self.game, self)
         if random.randrange(100) < COIN_SPAWN_RATIO:
             Coin(self.game, self)
-        if random.randrange(100) < SPIKEY_SPAWN_RATIO and self.image == normal_images[0]:
+        if random.randrange(100) < SPIKEY_SPAWN_RATIO and self.image == normal_images[0] and not self.on_move:
             Spikey(self.game, self)
-        if random.randrange(100) < CLOUD_SPAWN_RATIO:
+        if random.randrange(100) < CLOUD_SPAWN_RATIO and not self.on_move:
             Cloud(self.game, self)
+
+    def update(self, *args):
+        if self.on_move:
+            self.rect.x += self.vel_x
+            if self.rect.right > WIDTH - 15:
+                self.vel_x = -1
+            if self.rect.left < 15:
+                self.vel_x = 1
 
 
 class Powerup(pygame.sprite.Sprite):
@@ -509,8 +522,7 @@ class Cloud(pygame.sprite.Sprite):
             self.image = self.images[self.current_frame]
         # Spawning the lightining at the peak image
         if self.image == self.images[4]:
-            Lightining(self.game, self)
-
+            l = Lightining(self.game, self)
 
 
 class Lightining(pygame.sprite.Sprite):
