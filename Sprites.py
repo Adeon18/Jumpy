@@ -222,14 +222,8 @@ class Platform(pygame.sprite.Sprite):
         pink_images = [self.game.spritesheet1.get_image(0, 576, 380, 94),
                        self.game.spritesheet1.get_image(218, 1456, 201, 100)]
         # Platform choices
-        if 250 > self.game.score >= 0:
-            if random.randrange(100) < 90:
-                self.type = 'normal'
-            else:
-                self.type = 'snowy'
-            #self.type = choice(['normal', 'snowy'])
-        if 500 > self.game.score >= 250:
-            if random.randrange(100) < 75:
+        if 500 > self.game.score >= 0:
+            if random.randrange(100) < 85:
                 self.type = 'normal'
             else:
                 self.type = 'snowy'
@@ -275,6 +269,7 @@ class Platform(pygame.sprite.Sprite):
             Spikey(self.game, self)
         if random.randrange(100) < CLOUD_SPAWN_RATIO:
             Cloud(self.game, self)
+
 
 class Powerup(pygame.sprite.Sprite):
     def __init__(self, game, plat):
