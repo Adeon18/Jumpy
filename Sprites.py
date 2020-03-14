@@ -211,10 +211,20 @@ class Platform(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.on_move = False
+        self.on_move_x = False
+        self.on_move_y = False
         self.vel_x = 1
-        self.vel_y = 0
-        if random.randrange(100) < 5:
+        self.vel_y = 1
+        self.count_vel_y = 0
+        # Applying the chances of spawning a moving plat
+        if random.randrange(100) < MOVING_PLAT_SPAWN_RATIO and self.game.score > 300:
             self.on_move = True
+        # Defining the move type
+        if self.on_move:
+            if random.randrange(100) < 90:
+                self.on_move_x = True
+            else:
+                self.on_move_y = True
         # Platform images
         snowy_images = [self.game.spritesheet1.get_image(0, 768, 380, 94),
                         self.game.spritesheet1.get_image(213, 1764, 201, 100)]
@@ -266,7 +276,7 @@ class Platform(pygame.sprite.Sprite):
         self.rect.y = y
 
         # Applying the sprites spawning on platform
-        if random.randrange(100) < POWERUP_SPAWN_RATIO and not game.player.invincible:
+        if random.randrange(100) < POWERUP_SPAWN_RATIO and not game.player.invincible and not self.on_move_y:
             Powerup(self.game, self)
         if random.randrange(100) < COIN_SPAWN_RATIO:
             Coin(self.game, self)
@@ -276,12 +286,21 @@ class Platform(pygame.sprite.Sprite):
             Cloud(self.game, self)
 
     def update(self, *args):
-        if self.on_move:
+        # Moving left/right
+        if self.on_move_x:
             self.rect.x += self.vel_x
             if self.rect.right > WIDTH - 15:
                 self.vel_x = -1
             if self.rect.left < 15:
                 self.vel_x = 1
+        # Moving up/down
+        if self.on_move_y:
+            self.rect.y += self.vel_y
+            self.count_vel_y += self.vel_y
+            if self.count_vel_y > 130:
+                self.vel_y = -1
+            if self.count_vel_y < 0:
+                self.vel_y = 1
 
 
 class Powerup(pygame.sprite.Sprite):
