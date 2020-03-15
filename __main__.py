@@ -51,7 +51,7 @@ class Game:
         self.tut_b = Button(self, WIDTH // 2, HEIGHT // 2 + 56 * 3)
         # Cloud images
         self.cloud_images = []
-        for i in range(1,4):
+        for i in range(1, 4):
             self.cloud_images.append(pygame.image.load(path.join(img_dir, 'cloud{}.png'.format(i))).convert())
         # Load Sound
         self.sound_dir = path.join(self.dir, 'Sounds')
@@ -132,8 +132,7 @@ class Game:
                         else:
                             self.player.friction = PLAYER_FRICTION
 
-
-        # if player reaches the 1/4 of the screen
+        # If player reaches the 1/4 of the screen
         if self.player.rect.top <= HEIGHT / 3:
             if random.randrange(100) < CLOUD_BG_SPAWN_RATIO:
                 Cloud_bg(self)
@@ -144,9 +143,9 @@ class Game:
             # Move the platforms further down
             for plat in self.platforms:
                 plat.rect.y += max(abs(self.player.vel.y), 3)
-                if plat.rect.top >= HEIGHT:
+                if plat.rect.top >= HEIGHT and not plat.has_spikey:
                     plat.kill()
-                    self.score += 10
+                    self.score += 13
                     # We add value to this score so we can monitor the bubble
                     if self.player.invincible:
                         self.score_inv += 10
@@ -195,13 +194,19 @@ class Game:
         # spawn new platforms to keep the game runnin'
         while len(self.platforms) < 6:
             p_width = random.randrange(50, 100)
-            plat = Platform(self, random.randrange(3, WIDTH - p_width),
+            p = Platform(self, random.randrange(3, WIDTH - p_width),
                          random.randrange(-75, -30))
+            # If platforms collide we move them up
+            for plat in self.platforms:
+                hit = pygame.sprite.spritecollide(p, self.platforms, False)
+                if hit:
+                    dist = abs(plat.rect.y - p.rect.y)
+                    p.rect.y = -dist - 100
             # If the platform is beyond the screen we adjust it's pos
-            if plat.rect.right > WIDTH:
-                plat.rect.right = WIDTH - 5
-            elif plat.rect.left < 0:
-                plat.rect.left = 5
+            if p.rect.right > WIDTH:
+                p.rect.right = WIDTH - 5
+            elif p.rect.left < 0:
+                p.rect.left = 5
         # Fading the screen when the player hits some score
         #if self.score == 100:
             #self.fade(WIDTH, HEIGHT)

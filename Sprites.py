@@ -213,6 +213,10 @@ class Platform(pygame.sprite.Sprite):
         self.on_move = False
         self.on_move_x = False
         self.on_move_y = False
+        self.has_spikey = False
+        self.has_cloud = False
+        self.has_pow = False
+        self.has_coin = False
         self.vel_x = 1
         self.vel_y = 1
         self.count_vel_y = 0
@@ -278,12 +282,16 @@ class Platform(pygame.sprite.Sprite):
         # Applying the sprites spawning on platform
         if random.randrange(100) < POWERUP_SPAWN_RATIO and not game.player.invincible and not self.on_move_y:
             Powerup(self.game, self)
+            self.has_pow = True
         if random.randrange(100) < COIN_SPAWN_RATIO:
             Coin(self.game, self)
+            self.has_coin = True
         if random.randrange(100) < SPIKEY_SPAWN_RATIO and self.image == normal_images[0] and not self.on_move:
             Spikey(self.game, self)
+            self.has_spikey = True
         if random.randrange(100) < CLOUD_SPAWN_RATIO and not self.on_move:
             Cloud(self.game, self)
+            self.has_cloud = True
 
     def update(self, *args):
         # Moving left/right
@@ -344,6 +352,7 @@ class Powerup(pygame.sprite.Sprite):
 
         if not self.game.platforms.has(self.plat):
             self.kill()
+            self.plat.has_pow = False
 
 class Coin(pygame.sprite.Sprite):
     def __init__(self, game, plat):
@@ -388,6 +397,7 @@ class Coin(pygame.sprite.Sprite):
             self.rect.bottom = self.plat.rect.top - 5
         if not self.game.platforms.has(self.plat):
             self.kill()
+            self.plat.has_coin = False
 
 
 class Mob(pygame.sprite.Sprite):
@@ -442,7 +452,7 @@ class Cloud_bg(pygame.sprite.Sprite):
         scale = random.randrange(50, 100) / 100
         self.image = pygame.transform.scale(self.image, (int(self.rect.width * scale), int(self.rect.height * scale)))
         self.rect.x = random.randrange(WIDTH - self.rect.width)
-        self.rect.y = random.randrange(-500, 50)
+        self.rect.y = random.randrange(-500, -50)
 
     def update(self):
         if self.rect.top > HEIGHT * 2:
@@ -464,8 +474,7 @@ class Spikey(pygame.sprite.Sprite):
         self.rect.centerx = self.plat.rect.centerx
         self.rect.bottom = self.plat.rect.top - 1
         self.velx = random.randrange(1, 2)
-        self.vely = 0
-        self.walking = False
+
 
 
     def load_images(self):
@@ -483,6 +492,8 @@ class Spikey(pygame.sprite.Sprite):
 
     def update(self):
         time_passed = pygame.time.get_ticks()
+        if self.game.platforms.has(self.plat):
+            self.rect.bottom = self.plat.rect.top - 1
         self.rect.x += self.velx
 
         if self.rect.right > self.plat.rect.right - 4:
@@ -504,6 +515,10 @@ class Spikey(pygame.sprite.Sprite):
             self.rect = self.image.get_rect()
             self.rect.centerx = centerx
             self.rect.bottom = rect_bottom
+            # Killing the sprite when it dissapears off the screen
+            if self.rect.top > HEIGHT:
+                self.kill()
+                self.plat.has_spikey = False
 
 
 class Cloud(pygame.sprite.Sprite):
@@ -533,6 +548,8 @@ class Cloud(pygame.sprite.Sprite):
 
     def update(self, *args):
         self.rect.centerx = self.plat.rect.centerx
+        if self.game.platforms.has(self.plat):
+            self.rect.bottom = self.plat.rect.top - 60
         # Setting the animation
         time_passed = pygame.time.get_ticks()
         if time_passed - self.last_update > 500:
@@ -541,7 +558,11 @@ class Cloud(pygame.sprite.Sprite):
             self.image = self.images[self.current_frame]
         # Spawning the lightining at the peak image
         if self.image == self.images[4]:
-            l = Lightining(self.game, self)
+            Lightining(self.game, self)
+        # Killing the sprite when it dissapears off the screen
+        if self.rect.top > HEIGHT:
+            self.kill()
+            self.plat.has_cloud = False
 
 
 class Lightining(pygame.sprite.Sprite):
