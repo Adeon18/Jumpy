@@ -6,6 +6,7 @@ from random import choice
 
 vec = pygame.math.Vector2
 
+
 class Spritesheet1:
     # Utility class for loading and parsing spritesheets
     def __init__(self, filename):
@@ -18,14 +19,12 @@ class Spritesheet1:
         image = pygame.transform.scale(image, (width // 2, height // 2))
         return image
 
-class Resize:
-    def __init__(self, image):
-        pass
 
-    def get_image(self, image, width, height):
-        # Grab an image out of a spritesheet
-        image = pygame.transform.scale(image, (width // 2, height // 2))
-        return image
+def Get_image_res(image):
+    width, height = image.get_size()
+    image = pygame.transform.scale(image, (width // 2, height // 2))
+    return image
+
 
 class Button(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -48,6 +47,7 @@ class Button(pygame.sprite.Sprite):
 
     def update(self):
         pygame.transform.scale(self.image, (380 * 2, 94 * 2))
+
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, game):
@@ -75,8 +75,8 @@ class Player(pygame.sprite.Sprite):
         # Standing frames for 2 cases:default and invincible
         self.standing_frames = [self.game.spritesheet1.get_image(614, 1063, 120, 191),
                          self.game.spritesheet1.get_image(690, 406, 120, 201)]
-        self.standing_frames_inv = [Resize.get_image(self, pygame.image.load('graphics/bunny1_inv_stand.png'), 211, 215),
-                                Resize.get_image(self, pygame.image.load('graphics/bunny1_inv_ready.png'), 211, 215)]
+        self.standing_frames_inv = [Get_image_res(pygame.image.load('graphics/bunny1_inv_stand.png')),
+                                    Get_image_res(pygame.image.load('graphics/bunny1_inv_ready.png'))]
         # Clearing the black square around the frames
         for frame in self.standing_frames:
             frame.set_colorkey(BLACK)
@@ -85,8 +85,8 @@ class Player(pygame.sprite.Sprite):
         # Walking frames for 2 cases
         self.walking_frames_R = [self.game.spritesheet1.get_image(678, 860, 120, 201),
                                  self.game.spritesheet1.get_image(692, 1458, 120, 207)]
-        self.walking_frames_inv_R = [Resize.get_image(self, pygame.image.load('graphics/bunny1_inv_walk1.png'), 211, 215),
-                                 Resize.get_image(self, pygame.image.load('graphics/bunny1_inv_walk2.png'), 211, 215)]
+        self.walking_frames_inv_R = [Get_image_res(pygame.image.load('graphics/bunny1_inv_walk1.png')),
+                                     Get_image_res(pygame.image.load('graphics/bunny1_inv_walk2.png'))]
         self.walking_frames_L = []
         self.walking_frames_inv_L = []
         # Applying the L frames in both cases
@@ -101,7 +101,7 @@ class Player(pygame.sprite.Sprite):
         # Setting the jumping frame for both cases and removing the black squares
         self.jumping_frame = self.game.spritesheet1.get_image(382, 763, 150, 181)
         self.jumping_frame.set_colorkey(BLACK)
-        self.jumping_frame_inv = Resize.get_image(self, pygame.image.load('graphics/bunny1_inv_jump.png'), 211, 215)
+        self.jumping_frame_inv = Get_image_res(pygame.image.load('graphics/bunny1_inv_jump.png'))
         pygame.transform.scale(self.jumping_frame_inv, (211 // 2, 215 // 2))
 
     def jump(self):
@@ -203,7 +203,6 @@ class Player(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
 
 
-
 class Platform(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         self._layer = PLATFORM_LAYER
@@ -221,7 +220,7 @@ class Platform(pygame.sprite.Sprite):
         self.vel_y = 1
         self.count_vel_y = 0
         # Applying the chances of spawning a moving plat
-        if random.randrange(100) < MOVING_PLAT_SPAWN_RATIO and self.game.score > 300:
+        if random.randrange(100) < MOVING_PLAT_SPAWN_RATIO and self.game.score > 200:
             self.on_move = True
         # Defining the move type
         if self.on_move:
@@ -232,6 +231,8 @@ class Platform(pygame.sprite.Sprite):
         # Platform images
         snowy_images = [self.game.spritesheet1.get_image(0, 768, 380, 94),
                         self.game.spritesheet1.get_image(213, 1764, 201, 100)]
+        icy_images = [Get_image_res(pygame.image.load('graphics/ice_plat_l.png')),
+                      Get_image_res(pygame.image.load('graphics/ice_plat_s.png'))]
         normal_images = [self.game.spritesheet1.get_image(0, 288, 380, 94),
                          self.game.spritesheet1.get_image(213, 1662, 201, 100)]
         stone_images = [self.game.spritesheet1.get_image(0, 96, 380, 94),
@@ -241,26 +242,26 @@ class Platform(pygame.sprite.Sprite):
         pink_images = [self.game.spritesheet1.get_image(0, 576, 380, 94),
                        self.game.spritesheet1.get_image(218, 1456, 201, 100)]
         # Platform choices
-        if 500 > self.game.score >= 0:
-            if random.randrange(100) < 85:
+        if 250 > self.game.score >= 0:
+            if random.randrange(100) < 90:
                 self.type = 'normal'
             else:
-                self.type = 'snowy'
+                self.type = 'icy'
             #self.type = choice(['wooden', 'snowy'])
-        if 750 > self.game.score >= 500:
-            if random.randrange(100) < 60:
+        if 750 > self.game.score >= 250:
+            if random.randrange(100) < 99:
                 self.type = 'stone'
             else:
-                self.type = 'snowy'
+                self.type = 'icy'
             #self.type = choice(['stone', 'snowy'])
         if 1000 > self.game.score >= 750:
-            if random.randrange(100) < 50:
+            if random.randrange(100) < 79:
                 self.type = 'pink'
             else:
-                self.type = 'snowy'
+                self.type = 'icy'
             #self.type = choice(['pink', 'snowy'])
         if self.game.score >= 1000:
-            self.type = choice(['snowy'])
+            self.type = choice(['icy', 'snowy'])
 
         # Platform images attachment
         if self.type == 'normal':
@@ -273,6 +274,8 @@ class Platform(pygame.sprite.Sprite):
             self.image = random.choice(pink_images)
         elif self.type == 'snowy':
             self.image = random.choice(snowy_images)
+        elif self.type == 'icy':
+            self.image = random.choice(icy_images)
 
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
@@ -353,6 +356,7 @@ class Powerup(pygame.sprite.Sprite):
         if not self.game.platforms.has(self.plat):
             self.kill()
             self.plat.has_pow = False
+
 
 class Coin(pygame.sprite.Sprite):
     def __init__(self, game, plat):
@@ -530,10 +534,10 @@ class Cloud(pygame.sprite.Sprite):
         self.plat = plat
         # Defining the images
         self.images = [self.game.spritesheet1.get_image(0, 1152, 260, 134),
-                       Resize.get_image(self, pygame.image.load('graphics/Cloud1.png'), 260, 134),
-                       Resize.get_image(self, pygame.image.load('graphics/Cloud2.png'), 260, 134),
-                       Resize.get_image(self, pygame.image.load('graphics/Cloud3.png'), 260, 134),
-                       Resize.get_image(self, pygame.image.load('graphics/Cloud4.png'), 260, 134)]
+                       Get_image_res(pygame.image.load('graphics/Cloud1.png')),
+                       Get_image_res(pygame.image.load('graphics/Cloud2.png')),
+                       Get_image_res(pygame.image.load('graphics/Cloud3.png')),
+                       Get_image_res(pygame.image.load('graphics/Cloud4.png'))]
         self.image = self.images[0]
         self.rect = self.image.get_rect()
         self.rect.centerx = self.plat.rect.centerx

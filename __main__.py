@@ -44,6 +44,7 @@ class Game:
         img_dir = path.join(self.dir, 'images')
         # Bg images
         self.bg_menu = pygame.image.load('bg_menu.png')
+        self.bg_menu1 = pygame.image.load('bg_menu1.png')
         # Button images
         self.menu_b1 = Button(self, WIDTH // 2, HEIGHT // 2 + 56)
         self.menu_b2 = Button(self, WIDTH // 2, HEIGHT // 2 + 56 * 2)
@@ -108,9 +109,8 @@ class Game:
         # Bubble mechanics
         if self.player.invincible:
             self.player.vel.y = -BUBBLE_POWER
-            if self.score_inv >= 150:
+            if self.score_inv >= 180:
                 self.player.invincible = False
-
 
         # check if player hits a platform - only if falling
         if self.player.vel.y > 0:
@@ -127,7 +127,7 @@ class Game:
                         self.player.vel.y = 0
                         self.player.jumping = False
                         # If it is the snow platform then we change the friction
-                        if lowest_plat.type == 'snowy':
+                        if lowest_plat.type == 'icy':
                             self.player.friction = PLAYER_FRICTION_ON_SNOW
                         else:
                             self.player.friction = PLAYER_FRICTION
@@ -145,7 +145,7 @@ class Game:
                 plat.rect.y += max(abs(self.player.vel.y), 3)
                 if plat.rect.top >= HEIGHT and not plat.has_spikey:
                     plat.kill()
-                    self.score += 13
+                    self.score += random.randrange(10, 16)
                     # We add value to this score so we can monitor the bubble
                     if self.player.invincible:
                         self.score_inv += 10
@@ -157,9 +157,6 @@ class Game:
                 mob.rect.y += max(abs(self.player.vel.y), 3)
             for passive_mob in self.passive_mobs:
                 passive_mob.rect.y += max(abs(self.player.vel.y), 3)
-
-
-
 
         # Player/Coin hits
         coin_hits = pygame.sprite.spritecollide(self.player, self.coins, True)
@@ -177,10 +174,6 @@ class Game:
                 self.player.invincible = True
                 self.player.jumping = False
                 self.score_inv = 0
-
-
-
-
 
         # DIE!!!!
         if self.player.rect.bottom > HEIGHT:
@@ -232,9 +225,9 @@ class Game:
         # Game Loop - draw
         # Screen color change
         if 250 > self.score >= 0:
-            self.screen.fill(BG_COLOR)
+            self.screen.fill((156, 220, 255))
         if 500 > self.score >= 250:
-            self.screen.fill(BG_COLOR)
+            self.screen.fill((140, 156, 166))
         if 750 > self.score >= 500:
             self.screen.fill((140, 156, 166))
         if 1000 > self.score >= 750:
