@@ -242,25 +242,25 @@ class Platform(pygame.sprite.Sprite):
         pink_images = [self.game.spritesheet1.get_image(0, 576, 380, 94),
                        self.game.spritesheet1.get_image(218, 1456, 201, 100)]
         # Platform choices
-        if 250 > self.game.score >= 0:
+        if 750 > self.game.score >= 0:
             if random.randrange(100) < 90:
                 self.type = 'normal'
             else:
                 self.type = 'icy'
             #self.type = choice(['wooden', 'snowy'])
-        if 750 > self.game.score >= 250:
+        if 1600 > self.game.score >= 750:
             if random.randrange(100) < 99:
                 self.type = 'stone'
             else:
                 self.type = 'icy'
             #self.type = choice(['stone', 'snowy'])
-        if 1000 > self.game.score >= 750:
+        if 3200 > self.game.score >= 1600:
             if random.randrange(100) < 79:
                 self.type = 'pink'
             else:
                 self.type = 'icy'
             #self.type = choice(['pink', 'snowy'])
-        if self.game.score >= 1000:
+        if self.game.score >= 3200:
             self.type = choice(['icy', 'snowy'])
 
         # Platform images attachment

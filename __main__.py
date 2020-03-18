@@ -74,6 +74,15 @@ class Game:
         for plat in PLATFORM_LIST:
             Platform(self, *plat)
         self.mob_timer = 0
+        # Fade properties
+        self.R = 136
+        self.G = 202
+        self.B = 255
+        self.first_fade = False
+        self.second_fade = False
+        self.third_fade = False
+        self.color_change = False
+        # Music
         pygame.mixer.music.load(path.join(self.sound_dir, 'Happy Tune.ogg'))
         for i in range(10):
             c = Cloud_bg(self)
@@ -88,12 +97,14 @@ class Game:
             self.clock.tick(FPS)
             self.events()
             self.update()
-            self.draw()
+
         pygame.mixer.music.fadeout(500)
 
     def update(self):
         # Game Loop - Update
+        self.draw()
         self.all_sprites.update()
+
 
         # Spawn a mob?
         time_passed = pygame.time.get_ticks()
@@ -146,9 +157,13 @@ class Game:
                 if plat.rect.top >= HEIGHT and not plat.has_spikey:
                     plat.kill()
                     self.score += random.randrange(10, 16)
+                    # The variable at which we change fade
+                    self.color_change = True
                     # We add value to this score so we can monitor the bubble
                     if self.player.invincible:
                         self.score_inv += 10
+
+
             # Move the powerups further down(code differs because their vel is always changing)
             for pow in self.powerups:
                 pow.rect.y += max(abs(self.player.vel.y), 3) + pow.jumpCount
@@ -226,20 +241,10 @@ class Game:
                 if event.key == pygame.K_w:
                     self.player.jump_cut()
 
-
     def draw(self):
         # Game Loop - draw
         # Screen color change
-        if 250 > self.score >= 0:
-            self.screen.fill((156, 220, 255))
-        if 500 > self.score >= 250:
-            self.screen.fill((140, 156, 166))
-        if 750 > self.score >= 500:
-            self.screen.fill((140, 156, 166))
-        if 1000 > self.score >= 750:
-            self.screen.fill((215, 122, 255))
-        if self.score >= 1000:
-            self.screen.fill((215, 222, 255))
+        self.fade()
         self.all_sprites.draw(self.screen)
         self.draw_text(str(self.score), 32, BLACK, WIDTH / 2, 15)
         self.draw_text('Coins: ' + str(self.coin_amount), 32, BLACK, 50, 15)
@@ -359,17 +364,38 @@ class Game:
         text_rect.center = (x, y)
         self.screen.blit(text_surface, text_rect)
 
-
-    """def fade(self, WIDTH, HEIGHT):
-        screen = pygame.Surface((WIDTH, HEIGHT))
-        screen.fill((255, 68, 248))
-        for alpha in range(0, 300):
-            screen.set_alpha(alpha)
-            self.draw()
-            self.screen.blit(screen, (0, 0))
-            pygame.display.flip()
-            pygame.time.delay(5)"""
-
+    def fade(self):
+        # Filling the screen with our start colour
+        self.screen.fill((self.R, self.G, self.B))
+        # slowly changing the start colour as platforms get killed
+        if self.B > 169 and self.color_change and not self.first_fade and not self.second_fade:
+            self.B -= 1
+            if self.G > 169 and self.color_change:
+                self.G -= 1
+                self.color_change = False
+            self.color_change = False
+        self.screen.fill((self.R, self.G, self.B))
+        # As we fill the first fade we set it to true so the first if statement is false
+        if self.B == 169 and self.G == 169:
+            self.first_fade = True
+        # We can begin second fade now
+        if self.R < 255 and self.color_change:
+            self.R += 1
+            if self.B < 255 and self.color_change :
+                self.B += 1
+                self.color_change = False
+            self.color_change = False
+        self.screen.fill((self.R, self.G, self.B))
+        # Second fade is finished so we set it to true; 1st and 2nd ifs are false now
+        if self.B == 255 and self.R == 255:
+            self.second_fade = True
+        # We begin the thind fade
+        if self.G < 250 and self.color_change and self.second_fade and not self.third_fade:
+            self.G += 1
+            self.color_change = False
+        # Third fade is finished so we set all the ifs to false now and stop the fade
+        if self.G == 250:
+            self.third_fade = True
 
 g = Game()
 g.show_start_screen()
