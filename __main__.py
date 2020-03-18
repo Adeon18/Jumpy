@@ -35,9 +35,9 @@ class Game:
 
         with open(path.join(self.dir, COIN_FILE), 'r') as f:
             try:
-                self.coin_count = int(f.read())
+                self.coin_amount = int(f.read())
             except:
-                self.coin_count = 0
+                self.coin_amount = 0
 
         # Load spritesheet image
         self.spritesheet1 = Spritesheet1(path.join(self.dir, SPRITESHEET1))
@@ -159,9 +159,15 @@ class Game:
                 passive_mob.rect.y += max(abs(self.player.vel.y), 3)
 
         # Player/Coin hits
-        coin_hits = pygame.sprite.spritecollide(self.player, self.coins, True)
-        if coin_hits:
-            self.coin_count += 1
+        for coin in self.coins:
+            coin_hits = pygame.sprite.spritecollide(self.player, self.coins, True)
+            if coin_hits:
+                if coin.type == 'bronze':
+                    self.coin_amount += 1
+                elif coin.type == 'silver':
+                    self.coin_amount += 3
+                elif coin.type == 'gold':
+                    self.coin_amount += 5
 
         # Player/Powerup hits
         powerup_hits = pygame.sprite.spritecollide(self.player, self.powerups, True)
@@ -236,7 +242,7 @@ class Game:
             self.screen.fill((215, 222, 255))
         self.all_sprites.draw(self.screen)
         self.draw_text(str(self.score), 32, BLACK, WIDTH / 2, 15)
-        self.draw_text('Coins: ' + str(self.coin_count), 32, BLACK, 50, 15)
+        self.draw_text('Coins: ' + str(self.coin_amount), 32, BLACK, 50, 15)
         # *after* drawing everything, flip the display
         pygame.display.flip()
 
@@ -294,7 +300,7 @@ class Game:
             self.draw_text('High score :' + str(self.highscore), 32, ALMOST_WHITE, WIDTH / 2, HEIGHT / 5 + 36 * 2)
 
         with open(path.join(self.dir, COIN_FILE), 'w',) as f:
-            f.write(str(self.coin_count))
+            f.write(str(self.coin_amount))
 
         # Draw the coin count
         pygame.display.flip()

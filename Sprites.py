@@ -368,34 +368,56 @@ class Coin(pygame.sprite.Sprite):
         self.last_update = 0
         self.current_frame = 0
         self.load_images()
-        self.image = self.animation[0]
+        self.image = self.gold_images[0]
         self.rect = self.image.get_rect()
         self.rect.centerx = self.plat.rect.centerx
         self.rect.bottom = self.plat.rect.top - 5
+        if 900 > self.game.score >= 0:
+            self.type = 'bronze'
+        elif 1800 > self.game.score > 900:
+            self.type = 'silver'
+        else:
+            self.type = 'gold'
 
     def load_images(self):
-        self.animation = [self.game.spritesheet1.get_image(698, 1931, 84, 84),
-                       self.game.spritesheet1.get_image(829, 0, 66, 84),
-                       self.game.spritesheet1.get_image(897, 1574, 50, 84),
-                       self.game.spritesheet1.get_image(645, 651, 15, 84),
-                       pygame.transform.flip(self.game.spritesheet1.get_image(897, 1574, 50, 84), True, False),
-                       pygame.transform.flip(self.game.spritesheet1.get_image(829, 0, 66, 84), True, False)]
-
-        for image in self.animation:
+        self.gold_images = [self.game.spritesheet1.get_image(698, 1931, 84, 84),
+                            self.game.spritesheet1.get_image(829, 0, 66, 84),
+                            self.game.spritesheet1.get_image(897, 1574, 50, 84),
+                            self.game.spritesheet1.get_image(645, 651, 15, 84),
+                            pygame.transform.flip(self.game.spritesheet1.get_image(897, 1574, 50, 84), True, False),
+                            pygame.transform.flip(self.game.spritesheet1.get_image(829, 0, 66, 84), True, False)]
+        for image in self.gold_images:
             image.set_colorkey(BLACK)
-
-
+        self.silver_images = [self.game.spritesheet1.get_image(584, 406, 84, 84),
+                              self.game.spritesheet1.get_image(852, 1003, 66, 84),
+                              self.game.spritesheet1.get_image(899, 1219, 50, 84),
+                              self.game.spritesheet1.get_image(662, 651, 14, 84),
+                              pygame.transform.flip(self.game.spritesheet1.get_image(899, 1219, 50, 84), True, False),
+                              pygame.transform.flip(self.game.spritesheet1.get_image(852, 1003, 66, 84), True, False)]
+        for image in self.silver_images:
+            image.set_colorkey(BLACK)
+        self.bronze_images = [self.game.spritesheet1.get_image(707, 296, 84, 84),
+                              self.game.spritesheet1.get_image(826, 206, 66, 84),
+                              self.game.spritesheet1.get_image(899, 116, 50, 84),
+                              self.game.spritesheet1.get_image(670, 406, 14, 84),
+                              pygame.transform.flip(self.game.spritesheet1.get_image(899, 116, 50, 84), True, False),
+                              pygame.transform.flip(self.game.spritesheet1.get_image(826, 206, 66, 84), True, False)]
+        for image in self.bronze_images:
+            image.set_colorkey(BLACK)
 
     def update(self):
         time_passed = pygame.time.get_ticks()
         self.rect.centerx = self.plat.rect.centerx
         self.rect.bottom = self.plat.rect.top - 5
-        self.mask = pygame.mask.from_surface(self.image)
         if time_passed - self.last_update > 100:
             self.last_update = time_passed
-            self.current_frame = (self.current_frame + 1) % len(self.animation)
-            if Coin:
-                self.image = self.animation[self.current_frame]
+            self.current_frame = (self.current_frame + 1) % len(self.gold_images)
+            if self.type == 'bronze':
+                self.image = self.bronze_images[self.current_frame]
+            elif self.type == 'silver':
+                self.image = self.silver_images[self.current_frame]
+            else:
+                self.image = self.gold_images[self.current_frame]
             self.rect = self.image.get_rect()
             self.rect.centerx = self.plat.rect.centerx
             self.rect.bottom = self.plat.rect.top - 5
