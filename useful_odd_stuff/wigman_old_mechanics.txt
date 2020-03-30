@@ -1,0 +1,56 @@
+class Wingman(pygame.sprite.Sprite):
+    def __init__(self, game, plat):
+        self._layer = MOB_LAYER
+        self.groups = game.all_sprites, game.flying_mobs
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.plat = plat
+        self.images = [self.game.spritesheet1.get_image(382, 635, 174, 126),
+                       self.game.spritesheet1.get_image(0, 1879, 206, 107),
+                       self.game.spritesheet1.get_image(0, 1559, 216, 101),
+                       self.game.spritesheet1.get_image(0, 1456, 216, 101),
+                       self.game.spritesheet1.get_image(382, 510, 182, 123),
+                       self.game.spritesheet1.get_image(0, 1456, 216, 101),
+                       self.game.spritesheet1.get_image(0, 1559, 216, 101),
+                       self.game.spritesheet1.get_image(0, 1879, 206, 107)]
+        for image in self.images:
+            image.set_colorkey(BLACK)
+        self.image = self.images[0]
+        self.rect = self.image.get_rect()
+        self.rect.centerx = self.plat.rect.right
+        self.rect.centery = self.plat.rect.centery
+        self.vel_y = 2
+        self.count_vel_y = 0
+        self.current_frame = 0
+        self.last_update = 0
+        self.facing_top = False
+        self.facing_bottom = True
+        self.R = 0
+
+    def update(self, *args):
+        self.animation()
+
+        self.R += 1
+
+        if 90 >= self.R >= 0:
+            self.rect.y -= self.vel_y
+        if 180 >= self.R >= 90:
+            self.rect.x -= self.vel_y
+        if 270 >= self.R >= 180:
+            self.rect.y += self.vel_y
+        if 360 >= self.R >= 270:
+            self.rect.x += self.vel_y
+        if self.R >= 360:
+            self.R = 0
+
+        if not self.game.platforms.has(self.plat):
+            if self.rect.y > HEIGHT:
+                self.kill()
+
+    def animation(self):
+        time_passed = pygame.time.get_ticks()
+        if time_passed - self.last_update > 60:
+            self.last_update = time_passed
+            self.current_frame = (self.current_frame + 1) % len(self.images)
+            self.image = self.images[self.current_frame]
+            self.image = pygame.transform.rotate(self.image, self.R)

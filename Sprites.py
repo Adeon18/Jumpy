@@ -216,9 +216,13 @@ class Platform(pygame.sprite.Sprite):
         self.has_cloud = False
         self.has_pow = False
         self.has_coin = False
+        self.has_wingman = False
+        self.has_mob = False
         self.vel_x = 1
         self.vel_y = 1
         self.count_vel_y = 0
+        if self.has_spikey or self.has_cloud or self.has_wingman:
+            self.has_mob = True
         # Applying the chances of spawning a moving plat
         if random.randrange(100) < MOVING_PLAT_SPAWN_RATIO and self.game.score > 200:
             self.on_move = True
@@ -283,18 +287,24 @@ class Platform(pygame.sprite.Sprite):
         self.rect.y = y
 
         # Applying the sprites spawning on platform
-        if random.randrange(100) < POWERUP_SPAWN_RATIO and not game.player.invincible and not self.on_move_y:
+        if random.randrange(100) < POW_SPAWN_RATIO and not game.player.invincible and not self.on_move_y:
             Powerup(self.game, self)
             self.has_pow = True
         if random.randrange(100) < COIN_SPAWN_RATIO:
             Coin(self.game, self)
             self.has_coin = True
-        if random.randrange(100) < SPIKEY_SPAWN_RATIO and self.image == normal_images[0] and not self.on_move:
+        if random.randrange(100) < SPIKEY_SPAWN_RATIO and self.image == normal_images[0] and not self.on_move and not self.has_mob:
             Spikey(self.game, self)
             self.has_spikey = True
-        if random.randrange(100) < CLOUD_SPAWN_RATIO and not self.on_move:
+            self.has_mob = True
+        if random.randrange(100) < CLOUD_SPAWN_RATIO and not self.on_move and not self.has_mob:
             Cloud(self.game, self)
             self.has_cloud = True
+            self.has_mob = True
+        if random.randrange(100) < WM_SPAWN_RATIO and self.image == normal_images[0] and not self.on_move and not self.has_mob:
+            Wingman(self.game, self)
+            self.has_wingman = True
+            self.has_mob = True
 
     def update(self, *args):
         # Moving left/right
@@ -426,7 +436,7 @@ class Coin(pygame.sprite.Sprite):
             self.plat.has_coin = False
 
 
-class Mob(pygame.sprite.Sprite):
+class Flyman(pygame.sprite.Sprite):
     def __init__(self, game):
         self._layer = MOB_LAYER
         self.groups = game.all_sprites, game.mobs
@@ -463,6 +473,7 @@ class Mob(pygame.sprite.Sprite):
         if self.rect.left > WIDTH + 100 or self.rect.right < -100:
             self.velx *= -1
         if self.rect.centery > HEIGHT + 100:
+            self.game.has_flyman = False
             self.kill()
 
 
@@ -500,8 +511,6 @@ class Spikey(pygame.sprite.Sprite):
         self.rect.centerx = self.plat.rect.centerx
         self.rect.bottom = self.plat.rect.top - 1
         self.velx = random.randrange(1, 2)
-
-
 
     def load_images(self):
         self.images_R = [self.game.spritesheet1.get_image(704, 1256, 120, 159),
@@ -545,6 +554,7 @@ class Spikey(pygame.sprite.Sprite):
             if self.rect.top > HEIGHT:
                 self.kill()
                 self.plat.has_spikey = False
+                self.plat.has_mob = False
 
 
 class Cloud(pygame.sprite.Sprite):
@@ -589,6 +599,84 @@ class Cloud(pygame.sprite.Sprite):
         if self.rect.top > HEIGHT:
             self.kill()
             self.plat.has_cloud = False
+            self.plat.has_mob = False
+
+
+class Wingman(pygame.sprite.Sprite):
+    def __init__(self, game, plat):
+        self._layer = MOB_LAYER
+        self.groups = game.all_sprites, game.flying_mobs
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.plat = plat
+        self.images = [self.game.spritesheet1.get_image(382, 635, 174, 126),
+                       self.game.spritesheet1.get_image(0, 1879, 206, 107),
+                       self.game.spritesheet1.get_image(0, 1559, 216, 101),
+                       self.game.spritesheet1.get_image(0, 1456, 216, 101),
+                       self.game.spritesheet1.get_image(382, 510, 182, 123),
+                       self.game.spritesheet1.get_image(0, 1456, 216, 101),
+                       self.game.spritesheet1.get_image(0, 1559, 216, 101),
+                       self.game.spritesheet1.get_image(0, 1879, 206, 107)]
+        for image in self.images:
+            image.set_colorkey(BLACK)
+        self.image = self.images[0]
+        self.rect = self.image.get_rect()
+        self.rect.centerx = self.plat.rect.centerx
+        self.rect.centery = self.plat.rect.centery
+        self.acc_y = WM_ACC_UP
+        self.vel_y = 0
+        self.current_frame = 0
+        self.last_update = 0
+        self.facing_up = True
+        self.facing_down = False
+        self.R = 0
+
+    def update(self, *args):
+        self.animation()
+        self.rect.centerx = self.plat.rect.centerx
+        # We apply constant movement
+        if self.facing_up or self.facing_down:
+            self.rect.top += self.acc_y
+            self.acc_y += self.vel_y
+        # We apply the borders and change the animation properties
+        # We fall and we speed up as we do it
+        if self.rect.y > self.plat.rect.y + 80:
+            self.acc_y = WM_ACC_UP
+            self.vel_y = 0
+            self.facing_up = True
+            self.facing_down = False
+            self.current_frame = 0
+        # We slow down the falling sprite to make it look more natural
+        if self.plat.rect.y + 80 > self.rect.y > self.plat.rect.y + 40 and self.facing_down:
+            self.vel_y = -WM_VEL
+        # Going up
+        if self.rect.y < self.plat.rect.y - 120:
+            self.acc_y = WM_ACC_DOWN
+            self.vel_y = WM_VEL
+            if self.acc_y >= 4:
+                self.acc_y = 4
+            self.facing_down = True
+            self.facing_up = False
+        # Killing the sprite when it is out of the screen
+        if not self.game.platforms.has(self.plat):
+            if self.rect.y > HEIGHT:
+                self.kill()
+                self.plat.has_wingman = False
+                self.plat.has_mob = False
+
+    def animation(self):
+        # Animation up and down
+        time_passed = pygame.time.get_ticks()
+        if self.facing_up:
+            if time_passed - self.last_update > WM_FRAME_TIME:
+                self.last_update = time_passed
+                self.current_frame = (self.current_frame + 1) % len(self.images)
+                centery = self.rect.centery
+                self.image = self.images[self.current_frame]
+                self.rect = self.image.get_rect()
+                self.rect.centery = centery
+        else:
+            self.image = pygame.transform.flip(self.images[4], False, True)
 
 
 class Lightining(pygame.sprite.Sprite):

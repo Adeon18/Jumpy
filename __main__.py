@@ -69,11 +69,13 @@ class Game:
         self.coins = pygame.sprite.Group()
         self.mobs = pygame.sprite.Group()
         self.passive_mobs = pygame.sprite.Group()
+        self.flying_mobs = pygame.sprite.Group()
         self.clouds = pygame.sprite.Group()
         self.player = Player(self)
         for plat in PLATFORM_LIST:
             Platform(self, *plat)
         self.mob_timer = 0
+        self.has_flyman = False
         # Fade properties
         self.R = 136
         self.G = 202
@@ -108,14 +110,20 @@ class Game:
 
         # Spawn a mob?
         time_passed = pygame.time.get_ticks()
-        if time_passed - self.mob_timer > MOB_FREQ + random.choice([-1000, -500, 0, 500, 1000]) and self.player.pos.y < HEIGHT - 50:
+        if time_passed - self.mob_timer > MOB_FREQ + random.choice([-1000, -500, 0, 500, 1000]) and self.player.pos.y < HEIGHT - 50 and not self.has_flyman:
             self.mob_timer = time_passed
-            Mob(self)
+            Flyman(self)
+            self.has_flyman = True
 
         # Hit mobs
         mob_hits = pygame.sprite.spritecollide(self.player, self.mobs, False)
         if mob_hits and not self.player.invincible:
             if pygame.sprite.spritecollide(self.player, self.mobs, False, pygame.sprite.collide_mask):
+                self.playing = False
+        # Hit flying mobs
+        f_mob_hits = pygame.sprite.spritecollide(self.player, self.flying_mobs, False)
+        if f_mob_hits and not self.player.invincible:
+            if pygame.sprite.spritecollide(self.player, self.flying_mobs, False, pygame.sprite.collide_mask):
                 self.playing = False
         # Bubble mechanics
         if self.player.invincible:
@@ -144,7 +152,7 @@ class Game:
                             self.player.friction = PLAYER_FRICTION
 
         # If player reaches the 1/4 of the screen
-        if self.player.rect.top <= HEIGHT / 3:
+        if self.player.rect.top <= HEIGHT / 2 - 80:
             if random.randrange(100) < CLOUD_BG_SPAWN_RATIO:
                 Cloud_bg(self)
             self.player.pos.y += max(abs(self.player.vel.y), 3)
@@ -163,13 +171,14 @@ class Game:
                     if self.player.invincible:
                         self.score_inv += 10
 
-
             # Move the powerups further down(code differs because their vel is always changing)
             for pow in self.powerups:
                 pow.rect.y += max(abs(self.player.vel.y), 3) + pow.jumpCount
             # Move the mobs further down
             for mob in self.mobs:
                 mob.rect.y += max(abs(self.player.vel.y), 3)
+            for f_mob in self.flying_mobs:
+                f_mob.rect.y += max(abs(self.player.vel.y), 3) + f_mob.vel_y
             for passive_mob in self.passive_mobs:
                 passive_mob.rect.y += max(abs(self.player.vel.y), 3)
 
@@ -262,8 +271,30 @@ class Game:
         self.menu_b2.draw_txt('Tutorial', 32, ALMOST_WHITE)
         self.menu_b3.draw_txt('Settings', 32, ALMOST_WHITE)
         self.draw_text('High score :' + str(self.highscore), 32, ALMOST_WHITE, WIDTH / 2, 15)
+
+        def wait_for_key_startscr():
+            pygame.mouse.set_visible(True)
+            waiting = True
+            while waiting:
+                self.clock.tick(FPS)
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        waiting = False
+                        self.running = False
+                    # Getting the mouse pos and checking the button clicks
+                    pos = pygame.mouse.get_pos()
+                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                        if self.menu_b1.rect.collidepoint(pos):
+                            waiting = False
+                            pygame.mouse.set_visible(False)
+                        elif self.menu_b2.rect.collidepoint(pos):
+                            self.show_tutorial_screen()
+                        elif self.tut_b.rect.collidepoint(pos):
+                            waiting = False
+                            self.tut_b.kill()
+                            self.show_start_screen()
         pygame.display.flip()
-        self.wait_for_key_menu()
+        wait_for_key_startscr()
         pygame.mixer.music.fadeout(500)
 
     def show_tutorial_screen(self):
@@ -307,55 +338,31 @@ class Game:
         with open(path.join(self.dir, COIN_FILE), 'w',) as f:
             f.write(str(self.coin_amount))
 
-        # Draw the coin count
-        pygame.display.flip()
-        self.wait_for_key_goscr()
-        pygame.mixer.music.fadeout(500)
-
-    def wait_for_key_menu(self):
-        pygame.mouse.set_visible(True)
-        waiting = True
-        while waiting:
-            self.clock.tick(FPS)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    waiting = False
-                    self.running = False
-                # Getting the mouse pos and checking the button clicks
-                pos = pygame.mouse.get_pos()
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    if self.menu_b1.rect.collidepoint(pos):
-                        waiting = False
-                        pygame.mouse.set_visible(False)
-                    elif self.menu_b2.rect.collidepoint(pos):
-                        self.show_tutorial_screen()
-                    elif self.tut_b.rect.collidepoint(pos):
-                        waiting = False
-                        self.tut_b.kill()
-                        self.show_start_screen()
-
-
-    def wait_for_key_goscr(self):
-        pygame.mouse.set_visible(True)
-        waiting = True
-        while waiting:
-            self.clock.tick(FPS)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    waiting = False
-                    self.running = False
-                # Getting the pos and checking the button clicks
-                pos = pygame.mouse.get_pos()
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    if self.goscr_b1.rect.collidepoint(pos):
-                        waiting = False
-                        pygame.mouse.set_visible(False)
-                    if self.goscr_b2.rect.collidepoint(pos):
-                        waiting = False
-                        self.show_start_screen()
-                    elif self.goscr_b3.rect.collidepoint(pos):
+        def wait_for_key_goscr():
+            pygame.mouse.set_visible(True)
+            waiting = True
+            while waiting:
+                self.clock.tick(FPS)
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
                         waiting = False
                         self.running = False
+                    # Getting the pos and checking the button clicks
+                    pos = pygame.mouse.get_pos()
+                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                        if self.goscr_b1.rect.collidepoint(pos):
+                            waiting = False
+                            pygame.mouse.set_visible(False)
+                        if self.goscr_b2.rect.collidepoint(pos):
+                            waiting = False
+                            self.show_start_screen()
+                        elif self.goscr_b3.rect.collidepoint(pos):
+                            waiting = False
+                            self.running = False
+        # Draw the coin count
+        pygame.display.flip()
+        wait_for_key_goscr()
+        pygame.mixer.music.fadeout(500)
 
     def draw_text(self, text, size, color, x, y):
         font = pygame.font.Font(self.font_name, size)
