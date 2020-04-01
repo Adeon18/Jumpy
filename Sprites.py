@@ -448,7 +448,7 @@ class Flyman(pygame.sprite.Sprite):
         self.image_down.set_colorkey(BLACK)
         self.image = self.image_up
         self.rect = self.image.get_rect()
-        self.rect.centerx = random.choice([-100,WIDTH + 100])
+        self.rect.centerx = random.choice([-100, WIDTH + 100])
         self.velx = random.randrange(1, 4)
         self.vely = 0
         self.dy = 0.5
@@ -656,7 +656,7 @@ class Wingman(pygame.sprite.Sprite):
             self.rect.top += self.acc_y
             self.acc_y += self.vel_y
         # We apply the borders and change the animation properties
-        # We fall and we speed up as we do it
+        # Going up
         if self.rect.y > self.plat.rect.y + 80:
             self.acc_y = WM_ACC_UP
             self.vel_y = 0
@@ -666,7 +666,7 @@ class Wingman(pygame.sprite.Sprite):
         # We slow down the falling sprite to make it look more natural
         if self.plat.rect.y + 80 > self.rect.y > self.plat.rect.y + 40 and self.facing_down:
             self.vel_y = -WM_VEL
-        # Going up
+        # We fall and we speed up as we do it
         if self.rect.y < self.plat.rect.y - 120:
             self.acc_y = WM_ACC_DOWN
             self.vel_y = WM_VEL
@@ -694,6 +694,59 @@ class Wingman(pygame.sprite.Sprite):
                 self.rect.centery = centery
         else:
             self.image = pygame.transform.flip(self.images[4], False, True)
+
+
+class Sun(pygame.sprite.Sprite):
+    def __init__(self, game):
+        self._layer = MOB_LAYER
+        self.groups = game.all_sprites, game.flying_mobs
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        # Applying sun types according to bioms
+        self.type = 'sun'
+        if 1500 > self.game.score > SUN_SPAWN_SCORE:
+            self.type = 'moon'
+        if self.type == 'sun':
+            self.images = [self.game.spritesheet1.get_image(534, 913, 142, 148),
+                           self.game.spritesheet1.get_image(421, 1390, 148, 142)]
+        elif self.type == 'moon':
+            self.images = [self.game.spritesheet1.get_image(534, 763, 142, 148),
+                           self.game.spritesheet1.get_image(464, 1122, 148, 141)]
+        for image in self.images:
+            image.set_colorkey(BLACK)
+        self.image = self.images[0]
+        self.rect = self.image.get_rect()
+        # Applying y and x pos
+        self.rect.centerx = random.choice([-100, WIDTH + 100])
+        self.rect.y = random.choice([-100, -75])
+        # The vel is so that when everything gets moved to the bottom our sun moves slower to make the game challenging
+        # The vel isn't found anywhere in the class.It is in the game in flying mobs
+        self.vel_y = -PLAYER_JUMP_V // 3.5
+        self.vel_x = SUN_VEL
+        self.current_frame = 0
+        self.last_update = 0
+
+    def update(self, *args):
+        # Apply animation
+        self.animation()
+        # Apply constant movement
+        self.rect.x += self.vel_x
+        # Changing the direction
+        if self.rect.right > WIDTH - 5:
+            self.vel_x = -SUN_VEL
+        if self.rect.left < 5:
+            self.vel_x = SUN_VEL
+        # Killing the sprite if it is off the screen
+        if self.rect.y > HEIGHT:
+            self.kill()
+            self.game.has_sun = False
+
+    def animation(self):
+        time_passed = pygame.time.get_ticks()
+        if time_passed - self.last_update > SUN_FRAME_CHANGE:
+            self.last_update = time_passed
+            self.current_frame = (self.current_frame + 1) % len(self.images)
+            self.image = self.images[self.current_frame]
 
 
 class Lightining(pygame.sprite.Sprite):

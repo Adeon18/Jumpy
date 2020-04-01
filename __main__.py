@@ -76,6 +76,7 @@ class Game:
             Platform(self, *plat)
         self.mob_timer = 0
         self.has_flyman = False
+        self.has_sun = False
         # Fade properties
         self.R = 136
         self.G = 202
@@ -107,13 +108,21 @@ class Game:
         self.draw()
         self.all_sprites.update()
 
-
-        # Spawn a mob?
+        # Spawn a Flyman
         time_passed = pygame.time.get_ticks()
-        if time_passed - self.mob_timer > MOB_FREQ + random.choice([-1000, -500, 0, 500, 1000]) and self.player.pos.y < HEIGHT - 50 and not self.has_flyman:
+        if time_passed - self.mob_timer > FLYMAN_FREQ + random.choice([-1000, -500, 0, 500, 1000]) and self.player.pos.y\
+                < HEIGHT - 50 and not self.has_flyman and SUN_SPAWN_SCORE > self.score > FLYMAN_SPAWN_SCORE:
             self.mob_timer = time_passed
-            Flyman(self)
-            self.has_flyman = True
+            if random.randrange(100) < FLYMAN_SPAWN_RATIO:
+                Flyman(self)
+                self.has_flyman = True
+        # Spawn a Sun
+        if time_passed - self.mob_timer > SUN_FREQ + random.choice([-1000, -500, 0, 500, 1000]) and self.player.pos.y <\
+                HEIGHT - 50 and not self.has_sun and self.score > SUN_SPAWN_SCORE:
+            self.mob_timer = time_passed
+            if random.randrange(100) < SUN_SPAWN_RATIO:
+                Sun(self)
+                self.has_sun = True
 
         # Hit mobs
         mob_hits = pygame.sprite.spritecollide(self.player, self.mobs, False)
