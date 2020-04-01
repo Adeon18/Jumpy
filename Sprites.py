@@ -293,7 +293,7 @@ class Platform(pygame.sprite.Sprite):
         if random.randrange(100) < COIN_SPAWN_RATIO:
             Coin(self.game, self)
             self.has_coin = True
-        if random.randrange(100) < 50 and self.image == normal_images[0] and not self.on_move and not self.has_mob:
+        if random.randrange(100) < SPIKEY_SPAWN_RATIO and self.image == normal_images[0] and not self.on_move and not self.has_mob:
             Spikey(self.game, self)
             self.has_spikey = True
             self.has_mob = True
