@@ -216,23 +216,19 @@ class Game:
 
         # spawn new platforms to keep the game runnin'
         while len(self.platforms) < 6:
-            p_width = random.randrange(50, 100)
-            p = Platform(self, random.randrange(3, WIDTH - p_width),
-                         random.randrange(-75, -30))
+            p = Platform(self, random.randrange(5, WIDTH),
+                         random.randrange(-55, -35))
+            # If the platform is beyond the screen we adjust it's pos
+            if p.rect.right > WIDTH:
+                p.rect.right = WIDTH - 5
+            elif p.rect.left < 0:
+                p.rect.left = 5
             # If platforms collide we move them up
             for plat in self.platforms:
                 hit = pygame.sprite.spritecollide(p, self.platforms, False)
                 if hit:
                     dist = abs(plat.rect.y - p.rect.y)
                     p.rect.y = -dist - 100
-            # If the platform is beyond the screen we adjust it's pos
-            if p.rect.right > WIDTH:
-                p.rect.right = WIDTH - 5
-            elif p.rect.left < 0:
-                p.rect.left = 5
-        # Fading the screen when the player hits some score
-        #if self.score == 100:
-            #self.fade(WIDTH, HEIGHT)
 
 
     def events(self):

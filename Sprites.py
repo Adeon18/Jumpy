@@ -293,7 +293,7 @@ class Platform(pygame.sprite.Sprite):
         if random.randrange(100) < COIN_SPAWN_RATIO:
             Coin(self.game, self)
             self.has_coin = True
-        if random.randrange(100) < SPIKEY_SPAWN_RATIO and self.image == normal_images[0] and not self.on_move and not self.has_mob:
+        if random.randrange(100) < 50 and self.image == normal_images[0] and not self.on_move and not self.has_mob:
             Spikey(self.game, self)
             self.has_spikey = True
             self.has_mob = True
@@ -510,7 +510,10 @@ class Spikey(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.centerx = self.plat.rect.centerx
         self.rect.bottom = self.plat.rect.top - 1
-        self.velx = random.randrange(1, 2)
+        self.acc_x = SPIKEY_ACC
+        #self.vel_x = 0
+        self.facing_left = False
+        self.facing_right = True
 
     def load_images(self):
         self.images_R = [self.game.spritesheet1.get_image(704, 1256, 120, 159),
@@ -522,31 +525,45 @@ class Spikey(pygame.sprite.Sprite):
                          pygame.transform.flip(self.game.spritesheet1.get_image(812, 296, 90, 155), True, False)]
         for image in self.images_L:
             image.set_colorkey(BLACK)
-        self.stand_image = self.game.spritesheet1.get_image(814, 1417, 90, 155)
-        self.stand_image.set_colorkey(BLACK)
 
     def update(self):
-        time_passed = pygame.time.get_ticks()
+        self.animation()
         if self.game.platforms.has(self.plat):
             self.rect.bottom = self.plat.rect.top - 1
-        self.rect.x += self.velx
+        # Applying constant movement
+        if self.facing_left or self.facing_right:
+            self.rect.x += self.acc_x
+            #self.acc_x += self.vel_x
+        # Moving from right to left
+        if self.rect.right > self.plat.rect.right:
+            self.facing_right = False
+            self.facing_left = True
+            self.acc_x = -SPIKEY_ACC
+            #self.vel_x = 0
+        """if self.rect.right > self.plat.rect.right - 8 and self.facing_right:
+            self.vel_x = -0.04"""
+        # Moving from left to right
+        if self.rect.left < self.plat.rect.left:
+            self.facing_right = True
+            self.facing_left = False
+            self.acc_x = SPIKEY_ACC
+            #self.vel_x = 0
+        """if self.rect.left < self.plat.rect.left + 8 and self.facing_left:
+            self.vel_x = 0.04"""
 
-        if self.rect.right > self.plat.rect.right - 4:
-            self.velx -= 0.07
-        elif self.rect.left < self.plat.rect.left + 7:
-            self.velx += 0.07
-
-        if time_passed - self.last_update > 185:
+    def animation(self):
+        time_passed = pygame.time.get_ticks()
+        if time_passed - self.last_update > SPIKEY_FRAME_TIME:
             self.last_update = time_passed
             self.current_frame = (self.current_frame + 1) % len(self.images_R)
             rect_bottom = self.rect.bottom
             centerx = self.rect.centerx
-            if self.velx > 0:
+            if self.facing_right:
                 self.image = self.images_R[self.current_frame]
-                self.rect.x += self.velx
-            elif self.velx < 0:
+                self.rect.x += self.acc_x
+            if self.facing_left:
                 self.image = self.images_L[self.current_frame]
-                self.rect.x += self.velx
+                self.rect.x += self.acc_x
             self.rect = self.image.get_rect()
             self.rect.centerx = centerx
             self.rect.bottom = rect_bottom
