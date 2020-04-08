@@ -62,7 +62,8 @@ class Game:
     def new(self):
         # start a new game
         self.score = 0
-        self.score_inv = 0
+        self.bubble_score = 0
+        self.jetpack_score = 0
         self.all_sprites = pygame.sprite.LayeredUpdates()
         self.platforms = pygame.sprite.Group()
         self.powerups = pygame.sprite.Group()
@@ -72,7 +73,7 @@ class Game:
         self.flying_mobs = pygame.sprite.Group()
         self.clouds = pygame.sprite.Group()
         self.player = Player(self)
-        for plat in PLATFORM_LIST:
+        for plat in PLATFORM_LIST[0]:
             Platform(self, *plat)
         self.mob_timer = 0
         self.has_flyman = False
@@ -86,7 +87,7 @@ class Game:
         self.third_fade = False
         self.color_change = False
         # Music
-        pygame.mixer.music.load(path.join(self.sound_dir, 'Happy Tune.ogg'))
+        #pygame.mixer.music.load(path.join(self.sound_dir, 'Happy Tune.ogg'))
         for i in range(10):
             c = Cloud_bg(self)
             c.rect.y += 500
@@ -94,7 +95,7 @@ class Game:
 
     def run(self):
         # Game Loop
-        pygame.mixer.music.play(loops=-1)
+        #pygame.mixer.music.play(loops=-1)
         self.playing = True
         while self.playing:
             self.clock.tick(FPS)
@@ -126,19 +127,14 @@ class Game:
 
         # Hit mobs
         mob_hits = pygame.sprite.spritecollide(self.player, self.mobs, False)
-        if mob_hits and not self.player.invincible:
+        if mob_hits and not self.player.has_bubble and not self.player.has_jetpack:
             if pygame.sprite.spritecollide(self.player, self.mobs, False, pygame.sprite.collide_mask):
                 self.playing = False
         # Hit flying mobs
         f_mob_hits = pygame.sprite.spritecollide(self.player, self.flying_mobs, False)
-        if f_mob_hits and not self.player.invincible:
+        if f_mob_hits and not self.player.has_bubble and not self.player.has_jetpack:
             if pygame.sprite.spritecollide(self.player, self.flying_mobs, False, pygame.sprite.collide_mask):
                 self.playing = False
-        # Bubble mechanics
-        if self.player.invincible:
-            self.player.vel.y = -BUBBLE_POWER
-            if self.score_inv >= 180:
-                self.player.invincible = False
 
         # check if player hits a platform - only if falling
         if self.player.vel.y > 0:
@@ -174,11 +170,13 @@ class Game:
                 if plat.rect.top >= HEIGHT and not plat.has_spikey:
                     plat.kill()
                     self.score += random.randrange(10, 16)
+                    # We add value to this score so we can monitor the bubble
+                    if self.player.has_bubble:
+                        self.bubble_score += 10
+                    if self.player.has_jetpack:
+                        self.jetpack_score += 10
                     # The variable at which we change fade
                     self.color_change = True
-                    # We add value to this score so we can monitor the bubble
-                    if self.player.invincible:
-                        self.score_inv += 10
 
             # Move the powerups further down(code differs because their vel is always changing)
             for pow in self.powerups:
@@ -206,13 +204,41 @@ class Game:
         powerup_hits = pygame.sprite.spritecollide(self.player, self.powerups, True)
         for hit in powerup_hits:
             if hit.type == 'boost':
-                self.boost_sound.play()
+                #self.boost_sound.play()
                 self.player.vel.y = -BOOST_POWER
                 self.player.jumping = False
             elif hit.type == 'bubble':
-                self.player.invincible = True
+                self.player.has_bubble = True
                 self.player.jumping = False
-                self.score_inv = 0
+                self.bubble_score = 0
+            elif hit.type == 'jetpack':
+                self.player.has_jetpack = True
+                self.jetpack_score = 0
+
+        # Bubble mechanics
+        if self.player.has_bubble:
+            self.player.vel.y = -BUBBLE_SPEED
+            if self.bubble_score >= BUBBLE_END_SCORE:
+                self.player.has_bubble = False
+        # Jetpack mechanics:
+        if self.player.has_jetpack:
+            # We accelerate
+            self.player.acceleration = True
+            self.player.vel.y -= JETPACK_ACC
+            # Keeping the speed once we accelerated
+            if self.player.vel.y <= -JETPACK_SPEED:
+                self.player.acceleration = False
+                self.player.still = True
+                self.player.vel.y = -JETPACK_SPEED
+            # Slowing down
+            if JETPACK_END_SCORE >= self.jetpack_score >= 460:
+                self.player.acceleration = True
+                self.player.still = False
+                self.player.vel.y += JETPACK_DEACC
+            # Stopping the jetpack
+            if self.jetpack_score > JETPACK_END_SCORE:
+                self.player.acceleration = False
+                self.player.has_jetpack = False
 
         # DIE!!!!
         if self.player.rect.bottom > HEIGHT:
@@ -225,8 +251,12 @@ class Game:
 
         # spawn new platforms to keep the game runnin'
         while len(self.platforms) < 6:
-            p = Platform(self, random.randrange(5, WIDTH),
-                         random.randrange(-55, -35))
+            if self.player.has_jetpack or self.player.has_bubble:
+                p = Platform(self, random.randrange(5, WIDTH),
+                             random.randrange(-15, 0))
+            else:
+                p = Platform(self, random.randrange(5, WIDTH),
+                             random.randrange(-40, -35))
             # If the platform is beyond the screen we adjust it's pos
             if p.rect.right > WIDTH:
                 p.rect.right = WIDTH - 5

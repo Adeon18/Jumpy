@@ -37,7 +37,6 @@ class Button(pygame.sprite.Sprite):
         self.rect.center = (x, y)
         self.game.screen.blit(self.image, self.rect)
 
-
     def draw_txt(self, text, size, color):
         font = pygame.font.Font(self.game.font_name, size)
         text_surface = font.render(text, True, color)
@@ -57,7 +56,10 @@ class Player(pygame.sprite.Sprite):
         self.game = game
         self.walking = False
         self.jumping = False
-        self.invincible = False
+        self.has_bubble = False
+        self.has_jetpack = False
+        self.acceleration = False
+        self.still = False
         self.current_frame = 0
         self.last_invincible = 0
         self.last_update = 0
@@ -71,10 +73,9 @@ class Player(pygame.sprite.Sprite):
         self.friction = PLAYER_FRICTION
 
     def load_images(self):
-
         # Standing frames for 2 cases:default and invincible
         self.standing_frames = [self.game.spritesheet1.get_image(614, 1063, 120, 191),
-                         self.game.spritesheet1.get_image(690, 406, 120, 201)]
+                                self.game.spritesheet1.get_image(690, 406, 120, 201)]
         self.standing_frames_inv = [Get_image_res(pygame.image.load('graphics/bunny1_inv_stand.png')),
                                     Get_image_res(pygame.image.load('graphics/bunny1_inv_ready.png'))]
         # Clearing the black square around the frames
@@ -98,6 +99,15 @@ class Player(pygame.sprite.Sprite):
             pygame.transform.scale(frame, (211 // 2, 215 // 2))
             # 1 - horisontal , 2 - vertical
             self.walking_frames_inv_L.append(pygame.transform.flip(frame, True, False))
+        # Player/jetpack images
+        self.jet_start_frames = [Get_image_res(pygame.image.load('graphics/player_jet_start1.png')),
+                                 Get_image_res(pygame.image.load('graphics/player_jet_start2.png'))]
+        for image in self.jet_start_frames:
+            image.set_colorkey(BLACK)
+        self.jet_go_frames = [Get_image_res(pygame.image.load('graphics/player_jet1.png')),
+                              Get_image_res(pygame.image.load('graphics/player_jet2.png'))]
+        for image in self.jet_go_frames:
+            image.set_colorkey(BLACK)
         # Setting the jumping frame for both cases and removing the black squares
         self.jumping_frame = self.game.spritesheet1.get_image(382, 763, 150, 181)
         self.jumping_frame.set_colorkey(BLACK)
@@ -109,19 +119,23 @@ class Player(pygame.sprite.Sprite):
         self.rect.x += 2
         hits = pygame.sprite.spritecollide(self, self.game.platforms, False)
         self.rect.x -= 2
-        if hits and not self.jumping:
+        if hits and not self.jumping and not self.has_jetpack:
             self.jumping = True
             self.vel.y = -PLAYER_JUMP_V
-            self.game.jump_sound.play()
+            #self.game.jump_sound.play()
 
     def jump_cut(self):
-        if self.jumping:
+        if self.jumping and not self.has_jetpack:
             if self.vel.y < -10:
                 self.vel.y = -10
 
     def update(self):
         self.animation()
-        self.acc = vec(0, PLAYER_GRAV)
+        if self.has_bubble or self.has_jetpack:
+            self.acc = vec(0, 0)
+        else:
+            self.acc = vec(0, PLAYER_GRAV)
+
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
             self.acc.x = -PLAYER_ACC
@@ -133,7 +147,7 @@ class Player(pygame.sprite.Sprite):
 
         # equations of motion
         self.vel += self.acc
-        if abs(self.vel.x) < 0.5: # If the vel < 0.5 we stop
+        if abs(self.vel.x) < 0.5:  # If the vel < 0.5 we stop
             self.vel.x = 0
         self.pos += self.vel + 0.5 * self.acc
 
@@ -145,7 +159,6 @@ class Player(pygame.sprite.Sprite):
 
         self.rect.midbottom = self.pos
 
-
     def animation(self):
         time_passed = pygame.time.get_ticks()
         if self.vel.x != 0:
@@ -154,30 +167,30 @@ class Player(pygame.sprite.Sprite):
             self.walking = False
 
         # Show walking animation
-        if self.walking:
+        if self.walking and not self.has_jetpack:
             if time_passed - self.last_update > 140:
                 self.last_update = time_passed
-                if self.invincible:
+                if self.has_bubble:
                     self.current_frame = (self.current_frame + 1) % len(self.walking_frames_inv_L)
                 else:
                     self.current_frame = (self.current_frame + 1) % len(self.walking_frames_L)
                 rect_bottom = self.rect.bottom
                 if self.vel.x > 0:
-                    if self.invincible:
+                    if self.has_bubble:
                         self.image = self.walking_frames_inv_R[self.current_frame]
                     else:
                         self.image = self.walking_frames_R[self.current_frame]
                 else:
-                    if self.invincible:
+                    if self.has_bubble:
                         self.image = self.walking_frames_inv_L[self.current_frame]
                     else:
                         self.image = self.walking_frames_L[self.current_frame]
                 self.rect = self.image.get_rect()
                 self.rect.bottom = rect_bottom
         # Show jumping animation
-        if self.jumping and not self.walking:
+        if self.jumping and not self.walking and not self.has_jetpack:
             rect_bottom = self.rect.bottom
-            if self.invincible:
+            if self.has_bubble:
                 self.image = self.jumping_frame_inv
             else:
                 self.image = self.jumping_frame
@@ -185,20 +198,30 @@ class Player(pygame.sprite.Sprite):
             self.rect.bottom = rect_bottom
 
         # Show standing animation
-        if not self.jumping and not self.walking:
+        if not self.jumping and not self.walking and not self.has_jetpack:
             if time_passed - self.last_update > 350:
                 self.last_update = time_passed
-                if self.invincible:
+                if self.has_bubble:
                     self.current_frame = (self.current_frame + 1) % len(self.standing_frames_inv)
                 else:
                     self.current_frame = (self.current_frame + 1) % len(self.standing_frames)
                 rect_bottom = self.rect.bottom
-                if self.invincible:
+                if self.has_bubble:
                     self.image = self.standing_frames_inv[self.current_frame]
                 else:
                     self.image = self.standing_frames[self.current_frame]
                 self.rect = self.image.get_rect()
                 self.rect.bottom = rect_bottom
+        # Show jetpack animation
+        if self.has_jetpack:
+            if time_passed - self.last_update > 50:
+                self.last_update = time_passed
+                if self.acceleration:
+                    self.current_frame = (self.current_frame + 1) % len(self.jet_start_frames)
+                    self.image = self.jet_start_frames[self.current_frame]
+                if self.still:
+                    self.current_frame = (self.current_frame + 1) % len(self.jet_go_frames)
+                    self.image = self.jet_go_frames[self.current_frame]
 
         self.mask = pygame.mask.from_surface(self.image)
 
@@ -251,19 +274,19 @@ class Platform(pygame.sprite.Sprite):
                 self.type = 'normal'
             else:
                 self.type = 'icy'
-            #self.type = choice(['wooden', 'snowy'])
+            # self.type = choice(['wooden', 'snowy'])
         if 1600 > self.game.score >= 750:
             if random.randrange(100) < 99:
                 self.type = 'stone'
             else:
                 self.type = 'icy'
-            #self.type = choice(['stone', 'snowy'])
+            # self.type = choice(['stone', 'snowy'])
         if 3200 > self.game.score >= 1600:
             if random.randrange(100) < 79:
                 self.type = 'pink'
             else:
                 self.type = 'icy'
-            #self.type = choice(['pink', 'snowy'])
+            # self.type = choice(['pink', 'snowy'])
         if self.game.score >= 3200:
             self.type = choice(['icy', 'snowy'])
 
@@ -287,13 +310,15 @@ class Platform(pygame.sprite.Sprite):
         self.rect.y = y
 
         # Applying the sprites spawning on platform
-        if random.randrange(100) < POW_SPAWN_RATIO and not game.player.invincible and not self.on_move_y:
+        if random.randrange(100) < POW_SPAWN_RATIO and not game.player.has_bubble and not game.player.has_jetpack and \
+                not self.on_move_y:
             Powerup(self.game, self)
             self.has_pow = True
         if random.randrange(100) < COIN_SPAWN_RATIO:
             Coin(self.game, self)
             self.has_coin = True
-        if random.randrange(100) < SPIKEY_SPAWN_RATIO and self.image == normal_images[0] and not self.on_move and not self.has_mob:
+        if random.randrange(100) < SPIKEY_SPAWN_RATIO and self.image == normal_images[
+            0] and not self.on_move and not self.has_mob:
             Spikey(self.game, self)
             self.has_spikey = True
             self.has_mob = True
@@ -301,7 +326,8 @@ class Platform(pygame.sprite.Sprite):
             Cloud(self.game, self)
             self.has_cloud = True
             self.has_mob = True
-        if random.randrange(100) < WM_SPAWN_RATIO and self.image == normal_images[0] and not self.on_move and not self.has_mob:
+        if random.randrange(100) < WM_SPAWN_RATIO and self.image == normal_images[
+            0] and not self.on_move and not self.has_mob:
             Wingman(self.game, self)
             self.has_wingman = True
             self.has_mob = True
@@ -331,11 +357,13 @@ class Powerup(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.plat = plat
-        self.type = choice(['boost', 'bubble'])
+        self.type = choice(['bubble', 'boost', 'jetpack'])
         if self.type == 'boost':
             self.image = self.game.spritesheet1.get_image(820, 1805, 71, 70)
         elif self.type == 'bubble':
             self.image = self.game.spritesheet1.get_image(826, 134, 71, 70)
+        elif self.type == 'jetpack':
+            self.image = self.game.spritesheet1.get_image(852, 1089, 65, 77)
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.centerx = self.plat.rect.centerx
@@ -344,25 +372,29 @@ class Powerup(pygame.sprite.Sprite):
 
     def update(self):
         self.rect.centerx = self.plat.rect.centerx
-        # Checking if the powerup is out of the screen or on it
-        if self.rect.y >= 0:
-            if self.jumpCount >= -2:
-
-                self.jumpCount -= 0.1
-                self.rect.y -= (self.jumpCount * abs(self.jumpCount)) * 0.5
+        # Jetpack does not jump
+        if self.type != 'jetpack':
+            # Checking if the powerup is out of the screen or on it
+            if self.rect.y >= 0:
+                if self.jumpCount >= -2:
+                    self.jumpCount -= 0.1
+                    self.rect.y -= (self.jumpCount * abs(self.jumpCount)) * 0.5
+                else:
+                    self.jumpCount = 1.2
+                    self.rect.bottom = self.plat.rect.top - 2
+            # Else if the powerup is above the screen we change the signs
             else:
-                self.jumpCount = 1.2
-                self.rect.bottom = self.plat.rect.top - 2
-        # Else if the powerup is above the screen we change the signs
+                if self.jumpCount >= 2:
+
+                    self.jumpCount -= 0.1
+                    self.rect.y -= (self.jumpCount * abs(self.jumpCount)) * 0.5
+                else:
+                    self.jumpCount = 1.2
+                    self.rect.bottom = self.plat.rect.top - 2
+        # Jetpack always is still
         else:
-            if self.jumpCount >= 2:
-
-                self.jumpCount -= 0.1
-                self.rect.y -= (self.jumpCount * abs(self.jumpCount)) * 0.5
-            else:
-                self.jumpCount = 1.2
-                self.rect.bottom = self.plat.rect.top - 2
-
+            self.rect.bottom = self.plat.rect.top
+        # Killing the sprite
         if not self.game.platforms.has(self.plat):
             self.kill()
             self.plat.has_pow = False
@@ -511,7 +543,7 @@ class Spikey(pygame.sprite.Sprite):
         self.rect.centerx = self.plat.rect.centerx
         self.rect.bottom = self.plat.rect.top - 1
         self.acc_x = SPIKEY_ACC
-        #self.vel_x = 0
+        # self.vel_x = 0
         self.facing_left = False
         self.facing_right = True
 
@@ -533,13 +565,13 @@ class Spikey(pygame.sprite.Sprite):
         # Applying constant movement
         if self.facing_left or self.facing_right:
             self.rect.x += self.acc_x
-            #self.acc_x += self.vel_x
+            # self.acc_x += self.vel_x
         # Moving from right to left
         if self.rect.right > self.plat.rect.right:
             self.facing_right = False
             self.facing_left = True
             self.acc_x = -SPIKEY_ACC
-            #self.vel_x = 0
+            # self.vel_x = 0
         """if self.rect.right > self.plat.rect.right - 8 and self.facing_right:
             self.vel_x = -0.04"""
         # Moving from left to right
@@ -547,7 +579,7 @@ class Spikey(pygame.sprite.Sprite):
             self.facing_right = True
             self.facing_left = False
             self.acc_x = SPIKEY_ACC
-            #self.vel_x = 0
+            # self.vel_x = 0
         """if self.rect.left < self.plat.rect.left + 8 and self.facing_left:
             self.vel_x = 0.04"""
 
@@ -597,7 +629,6 @@ class Cloud(pygame.sprite.Sprite):
         # The first image is from the spritesheet so we set the colorkey to black
         if self.image == self.images[0]:
             self.image.set_colorkey(BLACK)
-
 
     def update(self, *args):
         self.rect.centerx = self.plat.rect.centerx
@@ -768,10 +799,43 @@ class Lightining(pygame.sprite.Sprite):
             self.rect.centerx = self.cloud.rect.centerx
         else:
             self.rect.right = self.cloud.rect.right - 10"""
+
     def update(self, *args):
         # Kill if the peak image is gone
         if self.cloud.image != self.cloud.images[4]:
             self.kill()
+
+"""class Jetpack(pygame.sprite.Sprite):
+    def __init__(self, game, player):
+        self._layer = JETPACK_LAYER
+        self.groups = game.all_sprites
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.player = player
+        self.image = self.game.spritesheet1.get_image(563, 1843, 133, 160)
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.centerx = self.player.rect.centerx
+        self.rect.centery = self.player.rect.centery
+
+    def update(self):
+        self.rect.centery += PLAYER_GRAV
+
+        if self.rect.top > HEIGHT:
+            self.kill()"""
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
