@@ -1,0 +1,18 @@
+        while len(self.platforms) < 6:
+            if self.player.has_jetpack or self.player.has_bubble:
+                p = Platform(self, random.randrange(5, WIDTH),
+                             random.randrange(-15, 0))
+            else:
+                p = Platform(self, random.randrange(5, WIDTH),
+                             random.randrange(-40, -35))
+            # If the platform is beyond the screen we adjust it's pos
+            if p.rect.right > WIDTH:
+                p.rect.right = WIDTH - 5
+            elif p.rect.left < 0:
+                p.rect.left = 5
+            # If platforms collide we move them up
+            for plat in self.platforms:
+                hit = pygame.sprite.spritecollide(p, self.platforms, False)
+                if hit:
+                    dist = abs(plat.rect.y - p.rect.y)
+                    p.rect.y = -dist - 100

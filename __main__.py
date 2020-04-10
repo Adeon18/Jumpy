@@ -73,7 +73,7 @@ class Game:
         self.flying_mobs = pygame.sprite.Group()
         self.clouds = pygame.sprite.Group()
         self.player = Player(self)
-        for plat in PLATFORM_LIST[0]:
+        for plat in PLATFORM_LIST:
             Platform(self, *plat)
         self.mob_timer = 0
         self.has_flyman = False
@@ -167,8 +167,21 @@ class Game:
             # Move the platforms further down
             for plat in self.platforms:
                 plat.rect.y += max(abs(self.player.vel.y), 3)
-                if plat.rect.top >= HEIGHT and not plat.has_spikey:
-                    plat.kill()
+                # Respawn the platforms
+                if plat.rect.top >= HEIGHT:
+                    plat.respawn = True
+                    # We kill the plat and spawn a new one
+                    if plat.respawn:
+                        p = Platform(self, random.randrange(0, WIDTH), plat.rect.y - 1.1 * HEIGHT)
+                        plat.kill()
+                        # Stop respawn
+                        plat.respawn = False
+                        # Kepping the plat fully on the screen
+                        if p.rect.right > WIDTH:
+                            p.rect.right = WIDTH - 5
+                        elif p.rect.left < 0:
+                            p.rect.left = 5
+                    # Increasing the score
                     self.score += random.randrange(10, 16)
                     # We add value to this score so we can monitor the bubble
                     if self.player.has_bubble:
@@ -248,27 +261,6 @@ class Game:
                     sprite.kill()
         if len(self.platforms) == 0:
             self.playing = False
-
-        # spawn new platforms to keep the game runnin'
-        while len(self.platforms) < 6:
-            if self.player.has_jetpack or self.player.has_bubble:
-                p = Platform(self, random.randrange(5, WIDTH),
-                             random.randrange(-15, 0))
-            else:
-                p = Platform(self, random.randrange(5, WIDTH),
-                             random.randrange(-40, -35))
-            # If the platform is beyond the screen we adjust it's pos
-            if p.rect.right > WIDTH:
-                p.rect.right = WIDTH - 5
-            elif p.rect.left < 0:
-                p.rect.left = 5
-            # If platforms collide we move them up
-            for plat in self.platforms:
-                hit = pygame.sprite.spritecollide(p, self.platforms, False)
-                if hit:
-                    dist = abs(plat.rect.y - p.rect.y)
-                    p.rect.y = -dist - 100
-
 
     def events(self):
         # Game Loop - events

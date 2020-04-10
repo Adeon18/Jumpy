@@ -241,6 +241,7 @@ class Platform(pygame.sprite.Sprite):
         self.has_coin = False
         self.has_wingman = False
         self.has_mob = False
+        self.respawn = False
         self.vel_x = 1
         self.vel_y = 1
         self.count_vel_y = 0
@@ -357,7 +358,7 @@ class Powerup(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.plat = plat
-        self.type = choice(['bubble', 'boost', 'jetpack'])
+        self.type = choice(['boost', 'bubble', 'jetpack'])
         if self.type == 'boost':
             self.image = self.game.spritesheet1.get_image(820, 1805, 71, 70)
         elif self.type == 'bubble':

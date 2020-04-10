@@ -57,7 +57,8 @@ SUN_SPAWN_SCORE = 780
 SUN_VEL = 2
 SUN_FRAME_CHANGE = 220
 # Starting platforms
-PLATFORM_LIST = [[(0, HEIGHT - 55,), (WIDTH / 2 - 50, HEIGHT * 3 / 4), (125, HEIGHT - 350), (350, 200), (175, 100,)]]
+PLATFORM_LIST = [(0, HEIGHT - 55,), (WIDTH / 2 - 100, HEIGHT * 3 / 4), (125, HEIGHT - 350), (280, 200), (175, 100),
+                 (20, -50)]
 
 # define colors
 WHITE = (255, 255, 255)

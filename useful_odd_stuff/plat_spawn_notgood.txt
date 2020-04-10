@@ -1,0 +1,22 @@
+        while len(self.platforms) < 6:
+            p = Platform(self, random.randrange(5, WIDTH),
+                         random.randrange(-400, -350))
+            for plat in self.platforms:
+                highest_plat = plat
+                if plat.rect.y < highest_plat.rect.y:
+                    highest_plat = plat
+                dist = abs(highest_plat.rect.y - p.rect.y)
+                if dist >= 200:
+                    print('Changed the plat pos')
+                    p.rect.y = highest_plat.rect.y + 200
+            # If the platform is beyond the screen we adjust it's pos
+            if p.rect.right > WIDTH:
+                p.rect.right = WIDTH - 5
+            elif p.rect.left < 0:
+                p.rect.left = 5
+            # If platforms collide we move them up
+            for plat in self.platforms:
+                hit = pygame.sprite.spritecollide(p, self.platforms, False)
+                if hit:
+                    dist = abs(plat.rect.y - p.rect.y)
+                    p.rect.y = -dist - 100
