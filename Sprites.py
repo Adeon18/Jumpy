@@ -232,15 +232,19 @@ class Platform(pygame.sprite.Sprite):
         self.groups = game.all_sprites, game.platforms
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
+        self.type = None
+        # Move properties
         self.on_move = False
         self.on_move_x = False
         self.on_move_y = False
+        # Mob properties
         self.has_spikey = False
         self.has_cloud = False
         self.has_pow = False
         self.has_coin = False
         self.has_wingman = False
         self.has_mob = False
+        # Respawn property
         self.respawn = False
         self.vel_x = 1
         self.vel_y = 1
@@ -269,18 +273,20 @@ class Platform(pygame.sprite.Sprite):
                        self.game.spritesheet1.get_image(218, 1558, 200, 100)]
         pink_images = [self.game.spritesheet1.get_image(0, 576, 380, 94),
                        self.game.spritesheet1.get_image(218, 1456, 201, 100)]
+        sand_images = [self.game.spritesheet1.get_image(0, 672, 380, 94),
+                       self.game.spritesheet1.get_image(208, 1879, 201, 100)]
         # Platform choices
         if 750 > self.game.score >= 0:
             if random.randrange(100) < 90:
                 self.type = 'normal'
             else:
-                self.type = 'icy'
+                self.type = 'sand'
             # self.type = choice(['wooden', 'snowy'])
         if 1600 > self.game.score >= 750:
-            if random.randrange(100) < 99:
+            if random.randrange(100) < 90:
                 self.type = 'stone'
             else:
-                self.type = 'icy'
+                self.type = 'sand'
             # self.type = choice(['stone', 'snowy'])
         if 3200 > self.game.score >= 1600:
             if random.randrange(100) < 79:
@@ -296,6 +302,8 @@ class Platform(pygame.sprite.Sprite):
             self.image = random.choice(normal_images)
         elif self.type == 'wooden':
             self.image = random.choice(wood_images)
+        elif self.type == 'sand':
+            self.image = random.choice(sand_images)
         elif self.type == 'stone':
             self.image = random.choice(stone_images)
         elif self.type == 'pink':
@@ -583,6 +591,11 @@ class Spikey(pygame.sprite.Sprite):
             # self.vel_x = 0
         """if self.rect.left < self.plat.rect.left + 8 and self.facing_left:
             self.vel_x = 0.04"""
+        # Killing the sprite when it disappears off the screen
+        if self.rect.top > HEIGHT:
+            self.kill()
+            self.plat.has_spikey = False
+            self.plat.has_mob = False
 
     def animation(self):
         time_passed = pygame.time.get_ticks()
@@ -600,11 +613,6 @@ class Spikey(pygame.sprite.Sprite):
             self.rect = self.image.get_rect()
             self.rect.centerx = centerx
             self.rect.bottom = rect_bottom
-            # Killing the sprite when it dissapears off the screen
-            if self.rect.top > HEIGHT:
-                self.kill()
-                self.plat.has_spikey = False
-                self.plat.has_mob = False
 
 
 class Cloud(pygame.sprite.Sprite):
@@ -642,7 +650,7 @@ class Cloud(pygame.sprite.Sprite):
             self.current_frame = (self.current_frame + 1) % len(self.images)
             self.image = self.images[self.current_frame]
         # Spawning the lightining at the peak image
-        if self.image == self.images[4]:
+        if self.image == self.images[4] and len(self.game.lightinings) < 4:
             Lightining(self.game, self)
         # Killing the sprite when it dissapears off the screen
         if self.rect.top > HEIGHT:
@@ -784,59 +792,20 @@ class Sun(pygame.sprite.Sprite):
 class Lightining(pygame.sprite.Sprite):
     def __init__(self, game, cloud):
         self._layer = MOB_LAYER
-        self.groups = game.all_sprites, game.mobs
+        self.groups = game.all_sprites, game.mobs, game.lightinings
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.cloud = cloud
         self.image = self.game.spritesheet1.get_image(895, 453, 55, 114)
+        # Rare gold lightining
+        if random.randrange(100.0) < 1.5:
+            self.image = self.game.spritesheet1.get_image(897, 0, 55, 114)
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
-        # self.pos = choice(['left', 'center', 'right'])
         self.rect.top = self.cloud.rect.bottom - 2
         self.rect.centerx = self.cloud.rect.centerx - 5
-        """if self.pos == 'left':
-            self.rect.left = self.cloud.rect.left + 10
-        elif self.pos == 'center':
-            self.rect.centerx = self.cloud.rect.centerx
-        else:
-            self.rect.right = self.cloud.rect.right - 10"""
 
     def update(self, *args):
         # Kill if the peak image is gone
-        if self.cloud.image != self.cloud.images[4]:
+        if self.cloud.image != self.cloud.images[4] or self.rect.top > HEIGHT:
             self.kill()
-
-"""class Jetpack(pygame.sprite.Sprite):
-    def __init__(self, game, player):
-        self._layer = JETPACK_LAYER
-        self.groups = game.all_sprites
-        pygame.sprite.Sprite.__init__(self, self.groups)
-        self.game = game
-        self.player = player
-        self.image = self.game.spritesheet1.get_image(563, 1843, 133, 160)
-        self.image.set_colorkey(BLACK)
-        self.rect = self.image.get_rect()
-        self.rect.centerx = self.player.rect.centerx
-        self.rect.centery = self.player.rect.centery
-
-    def update(self):
-        self.rect.centery += PLAYER_GRAV
-
-        if self.rect.top > HEIGHT:
-            self.kill()"""
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

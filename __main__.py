@@ -72,6 +72,7 @@ class Game:
         self.passive_mobs = pygame.sprite.Group()
         self.flying_mobs = pygame.sprite.Group()
         self.clouds = pygame.sprite.Group()
+        self.lightinings = pygame.sprite.Group()
         self.player = Player(self)
         for plat in PLATFORM_LIST:
             Platform(self, *plat)
@@ -153,6 +154,8 @@ class Game:
                         # If it is the snow platform then we change the friction
                         if lowest_plat.type == 'icy':
                             self.player.friction = PLAYER_FRICTION_ON_SNOW
+                        elif lowest_plat.type == 'sand':
+                            self.player.friction = PLAYER_FRICTION_ON_SAND
                         else:
                             self.player.friction = PLAYER_FRICTION
 
@@ -186,6 +189,7 @@ class Game:
                     # We add value to this score so we can monitor the bubble
                     if self.player.has_bubble:
                         self.bubble_score += 10
+                    # We add value to this score so we can monitor the jetpack
                     if self.player.has_jetpack:
                         self.jetpack_score += 10
                     # The variable at which we change fade
@@ -216,21 +220,28 @@ class Game:
         # Player/Powerup hits
         powerup_hits = pygame.sprite.spritecollide(self.player, self.powerups, True)
         for hit in powerup_hits:
-            if hit.type == 'boost':
+            if hit.type == 'boost' and not self.player.has_jetpack or self.player.has_bubble:
                 #self.boost_sound.play()
                 self.player.vel.y = -BOOST_POWER
                 self.player.jumping = False
-            elif hit.type == 'bubble':
+            elif hit.type == 'bubble' and not self.player.has_jetpack:
                 self.player.has_bubble = True
                 self.player.jumping = False
                 self.bubble_score = 0
-            elif hit.type == 'jetpack':
+            elif hit.type == 'jetpack' and not self.player.has_bubble:
                 self.player.has_jetpack = True
                 self.jetpack_score = 0
 
         # Bubble mechanics
         if self.player.has_bubble:
-            self.player.vel.y = -BUBBLE_SPEED
+            # We accelerate
+            self.player.vel.y -= BUBBLE_ACC
+            if self.player.vel.y <= -BUBBLE_SPEED:
+                self.player.vel.y = -BUBBLE_SPEED
+            # Keeping the speed once we accelerated
+            if BUBBLE_END_SCORE > self.bubble_score > 180:
+                self.player.vel.y += BUBBLE_ACC
+            # Slowing down
             if self.bubble_score >= BUBBLE_END_SCORE:
                 self.player.has_bubble = False
         # Jetpack mechanics:
@@ -253,7 +264,7 @@ class Game:
                 self.player.acceleration = False
                 self.player.has_jetpack = False
 
-        # DIE!!!!
+        # Game over
         if self.player.rect.bottom > HEIGHT:
             for sprite in self.all_sprites:
                 sprite.rect.y -= max(self.player.vel.y, 10)
@@ -430,6 +441,7 @@ class Game:
         # Third fade is finished so we set all the ifs to false now and stop the fade
         if self.G == 250:
             self.third_fade = True
+
 
 g = Game()
 g.show_start_screen()

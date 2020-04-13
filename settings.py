@@ -1,5 +1,4 @@
 # game options/settings
-
 TITLE = "Jumpy!"
 WIDTH = 480
 HEIGHT = 600
@@ -13,24 +12,26 @@ SPRITESHEET1 = 'spritesheet_jumper.png'
 PLAYER_ACC = 0.5
 PLAYER_FRICTION = -0.12
 PLAYER_FRICTION_ON_SNOW = -0.04
+PLAYER_FRICTION_ON_SAND = -0.2
 PLAYER_GRAV = 0.8
 PLAYER_JUMP_V = 20
 
 # Game properties
 BOOST_POWER = 40
+# Bubble properties
 BUBBLE_SPEED = 15
-BUBBLE_END_SCORE = 180
+BUBBLE_END_SCORE = 200
+BUBBLE_ACC = 0.5
+# Pow properties
 POW_SPAWN_RATIO = 7
+# Cloud_bg properties
 CLOUD_BG_SPAWN_RATIO = 6
+# Cloud properties
 CLOUD_SPAWN_RATIO = 3
+# Coin properties
 COIN_SPAWN_RATIO = 3
+# Plat properties
 MOVING_PLAT_SPAWN_RATIO = 11
-PLATFORM_LAYER = 1
-PLAYER_LAYER = 5
-POW_LAYER = 2
-JETPACK_LAYER = 6
-MOB_LAYER = 3
-CLOUD_LAYER = 0
 # Jetpack properties
 JETPACK_ACC = 1.5
 JETPACK_DEACC = 0.5
@@ -56,6 +57,13 @@ SUN_SPAWN_RATIO = 25
 SUN_SPAWN_SCORE = 780
 SUN_VEL = 2
 SUN_FRAME_CHANGE = 220
+# Layers
+PLATFORM_LAYER = 1
+PLAYER_LAYER = 5
+POW_LAYER = 2
+JETPACK_LAYER = 6
+MOB_LAYER = 3
+CLOUD_LAYER = 0
 # Starting platforms
 PLATFORM_LIST = [(0, HEIGHT - 55,), (WIDTH / 2 - 100, HEIGHT * 3 / 4), (125, HEIGHT - 350), (280, 200), (175, 100),
                  (20, -50)]
