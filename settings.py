@@ -29,7 +29,7 @@ BUBBLE_ACC = 0.5
 WINGS_END_SCORE = 450
 WING_SPEED = 11
 # Pow properties
-POW_SPAWN_RATIO = 70
+POW_SPAWN_RATIO = 7
 # Cloud_bg properties
 CLOUD_BG_SPAWN_RATIO = 6
 # Cloud properties
