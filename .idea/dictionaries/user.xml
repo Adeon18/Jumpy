@@ -2,6 +2,8 @@
   <dictionary name="user">
     <words>
       <w>jetpack</w>
+      <w>powerup</w>
+      <w>powerups</w>
       <w>respawn</w>
     </words>
   </dictionary>

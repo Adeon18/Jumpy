@@ -64,6 +64,7 @@ class Game:
         self.score = 0
         self.bubble_score = 0
         self.jetpack_score = 0
+        self.wings_score = 0
         self.all_sprites = pygame.sprite.LayeredUpdates()
         self.platforms = pygame.sprite.Group()
         self.powerups = pygame.sprite.Group()
@@ -118,11 +119,18 @@ class Game:
             if random.randrange(100) < FLYMAN_SPAWN_RATIO:
                 Flyman(self)
                 self.has_flyman = True
-        # Spawn a Sun
-        if time_passed - self.mob_timer > SUN_FREQ + random.choice([-1000, -500, 0, 500, 1000]) and self.player.pos.y <\
-                HEIGHT - 50 and not self.has_sun and self.score > SUN_SPAWN_SCORE:
-            self.mob_timer = time_passed
-            if random.randrange(100) < SUN_SPAWN_RATIO:
+        # Spawn a Sun without wing powerup
+        if not self.player.has_wings:
+            if time_passed - self.mob_timer > SUN_FREQ + random.choice([-1000, -500, 0, 500, 1000]) \
+                    and self.player.pos.y < HEIGHT - 50 and not self.has_sun and self.score > SUN_SPAWN_SCORE:
+                self.mob_timer = time_passed
+                if random.randrange(100) < SUN_SPAWN_RATIO:
+                    Sun(self)
+                    self.has_sun = True
+        # Spawn a sun when the wings are initiated
+        else:
+            if time_passed - self.mob_timer > 1000 and not self.player.losing_wings:
+                self.mob_timer = time_passed
                 Sun(self)
                 self.has_sun = True
 
@@ -158,9 +166,13 @@ class Game:
                             self.player.friction = PLAYER_FRICTION_ON_SAND
                         else:
                             self.player.friction = PLAYER_FRICTION
-
+        # We move everything further down at a rate which depends on the wings pow being initiated or no
+        if self.player.has_wings:
+            SCR_CHANGE_H = SCR_CHANGE_H_FLY
+        else:
+            SCR_CHANGE_H = HEIGHT / 2 - 80
         # If player reaches the 1/4 of the screen
-        if self.player.rect.top <= HEIGHT / 2 - 80:
+        if self.player.rect.top <= SCR_CHANGE_H:
             if random.randrange(100) < CLOUD_BG_SPAWN_RATIO:
                 Cloud_bg(self)
             self.player.pos.y += max(abs(self.player.vel.y), 3)
@@ -186,12 +198,13 @@ class Game:
                             p.rect.left = 5
                     # Increasing the score
                     self.score += random.randrange(10, 16)
-                    # We add value to this score so we can monitor the bubble
+                    # We add values to this score so we can monitor the powerups
                     if self.player.has_bubble:
                         self.bubble_score += 10
-                    # We add value to this score so we can monitor the jetpack
                     if self.player.has_jetpack:
                         self.jetpack_score += 10
+                    if self.player.has_wings:
+                        self.wings_score += 10
                     # The variable at which we change fade
                     self.color_change = True
 
@@ -220,17 +233,38 @@ class Game:
         # Player/Powerup hits
         powerup_hits = pygame.sprite.spritecollide(self.player, self.powerups, True)
         for hit in powerup_hits:
-            if hit.type == 'boost' and not self.player.has_jetpack or self.player.has_bubble:
+            # Only 1 pow can be taken at a time
+            if hit.type == 'boost' and not (self.player.has_jetpack or self.player.has_bubble or self.player.has_wings):
                 #self.boost_sound.play()
                 self.player.vel.y = -BOOST_POWER
                 self.player.jumping = False
-            elif hit.type == 'bubble' and not self.player.has_jetpack:
+            elif hit.type == 'bubble' and not (self.player.has_jetpack or self.player.has_wings):
                 self.player.has_bubble = True
                 self.player.jumping = False
                 self.bubble_score = 0
-            elif hit.type == 'jetpack' and not self.player.has_bubble:
+            elif hit.type == 'jetpack' and not (self.player.has_bubble or self.player.has_wings):
                 self.player.has_jetpack = True
                 self.jetpack_score = 0
+            elif hit.type == 'wings' and not (self.player.has_bubble or self.player.has_jetpack):
+                self.player.has_wings = True
+                self.wings_score = 0
+
+        # Wings mechanics
+        if self.player.has_wings:
+            # We accelerate
+            self.player.vel.y -= BUBBLE_ACC
+            # Keeping the speed once we accelerated
+            if self.player.vel.y <= -WING_SPEED:
+                self.player.vel.y = -WING_SPEED
+            # Slowing down
+            if WINGS_END_SCORE > self.wings_score > 350:
+                self.player.vel.y += BUBBLE_ACC
+                # Moving the player up the screen var = true
+                self.player.losing_wings = True
+            # Wings are gone
+            if self.wings_score >= WINGS_END_SCORE:
+                self.player.losing_wings = False
+                self.player.has_wings = False
 
         # Bubble mechanics
         if self.player.has_bubble:
@@ -244,6 +278,7 @@ class Game:
             # Slowing down
             if self.bubble_score >= BUBBLE_END_SCORE:
                 self.player.has_bubble = False
+
         # Jetpack mechanics:
         if self.player.has_jetpack:
             # We accelerate
@@ -263,6 +298,7 @@ class Game:
             if self.jetpack_score > JETPACK_END_SCORE:
                 self.player.acceleration = False
                 self.player.has_jetpack = False
+
 
         # Game over
         if self.player.rect.bottom > HEIGHT:

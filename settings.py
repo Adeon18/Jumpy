@@ -10,6 +10,7 @@ SPRITESHEET1 = 'spritesheet_jumper.png'
 
 # Player properties
 PLAYER_ACC = 0.5
+PLAYER_FLY_ACC = 1
 PLAYER_FRICTION = -0.12
 PLAYER_FRICTION_ON_SNOW = -0.04
 PLAYER_FRICTION_ON_SAND = -0.2
@@ -18,12 +19,17 @@ PLAYER_JUMP_V = 20
 
 # Game properties
 BOOST_POWER = 40
+SCR_CHANGE_H = HEIGHT / 2 - 80
+SCR_CHANGE_H_FLY = HEIGHT / 6 * 5
 # Bubble properties
 BUBBLE_SPEED = 15
 BUBBLE_END_SCORE = 200
 BUBBLE_ACC = 0.5
+# Wings properties
+WINGS_END_SCORE = 450
+WING_SPEED = 11
 # Pow properties
-POW_SPAWN_RATIO = 7
+POW_SPAWN_RATIO = 70
 # Cloud_bg properties
 CLOUD_BG_SPAWN_RATIO = 6
 # Cloud properties

@@ -54,14 +54,19 @@ class Player(pygame.sprite.Sprite):
         self.groups = game.all_sprites
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
+        # Move properties
         self.walking = False
         self.jumping = False
+        # Pow properties
         self.has_bubble = False
         self.has_jetpack = False
+        self.has_wings = False
+        # Jet properties
         self.acceleration = False
         self.still = False
+        self.losing_wings = False
+        # Anmation properties
         self.current_frame = 0
-        self.last_invincible = 0
         self.last_update = 0
         self.load_images()
         self.image = self.standing_frames[1]
@@ -108,6 +113,12 @@ class Player(pygame.sprite.Sprite):
                               Get_image_res(pygame.image.load('graphics/player_jet2.png'))]
         for image in self.jet_go_frames:
             image.set_colorkey(BLACK)
+        # Player with wings images
+        self.has_wings_frames = [Get_image_res(pygame.image.load('graphics/player_fly1.png')),
+                                 Get_image_res(pygame.image.load('graphics/player_fly2.png')),
+                                 Get_image_res(pygame.image.load('graphics/player_fly3.png')),
+                                 Get_image_res(pygame.image.load('graphics/player_fly4.png')),
+                                 Get_image_res(pygame.image.load('graphics/player_fly5.png'))]
         # Setting the jumping frame for both cases and removing the black squares
         self.jumping_frame = self.game.spritesheet1.get_image(382, 763, 150, 181)
         self.jumping_frame.set_colorkey(BLACK)
@@ -115,59 +126,81 @@ class Player(pygame.sprite.Sprite):
         pygame.transform.scale(self.jumping_frame_inv, (211 // 2, 215 // 2))
 
     def jump(self):
-        # jump only if standing on a platform
+        # Jump only if standing on a platform and without a pow
         self.rect.x += 2
         hits = pygame.sprite.spritecollide(self, self.game.platforms, False)
         self.rect.x -= 2
-        if hits and not self.jumping and not self.has_jetpack:
+        if hits and not self.jumping and not self.has_jetpack and not self.has_wings:
             self.jumping = True
             self.vel.y = -PLAYER_JUMP_V
             #self.game.jump_sound.play()
 
     def jump_cut(self):
-        if self.jumping and not self.has_jetpack:
+        # The code that cuts the jump
+        if self.jumping and not self.has_jetpack and not self.has_wings:
             if self.vel.y < -10:
                 self.vel.y = -10
 
     def update(self):
         self.animation()
-        if self.has_bubble or self.has_jetpack:
+        # Applying gravity
+        if self.has_bubble or self.has_jetpack or self.has_wings:
             self.acc = vec(0, 0)
         else:
             self.acc = vec(0, PLAYER_GRAV)
-
+        # Applying movement
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_a]:
-            self.acc.x = -PLAYER_ACC
-        if keys[pygame.K_d]:
-            self.acc.x = PLAYER_ACC
+        # With wings
+        if self.has_wings:
+            if keys[pygame.K_a]:
+                self.acc.x = -PLAYER_FLY_ACC
+            if keys[pygame.K_d]:
+                self.acc.x = PLAYER_FLY_ACC
+        # Without wings
+        else:
+            if keys[pygame.K_a]:
+                self.acc.x = -PLAYER_ACC
+            if keys[pygame.K_d]:
+                self.acc.x = PLAYER_ACC
 
-        # apply friction
+        # Apply friction
         self.acc.x += self.vel.x * self.friction
 
-        # equations of motion
+        # Equations of motion
         self.vel += self.acc
         if abs(self.vel.x) < 0.5:  # If the vel < 0.5 we stop
             self.vel.x = 0
         self.pos += self.vel + 0.5 * self.acc
 
-        # wrap around the sides of the screen
+        # Wrap around the sides of the screen
         if self.pos.x > WIDTH + self.rect.width / 2:
             self.pos.x = 0 - self.rect.width / 2
         if self.pos.x < 0 - self.rect.width / 2:
             self.pos.x = WIDTH + self.rect.width / 2
 
+        # If player has wings we move him down the screen
+        if self.has_wings:
+            self.pos.y += 3
+            if self.pos.y >= SCR_CHANGE_H_FLY + 10:
+                self.pos.y = SCR_CHANGE_H_FLY + 10
+        # If player is about to lose wings we move him up the screen so he does not fall immediately after wing loss
+        if self.losing_wings:
+            self.pos.y -= 4
+            if self.pos.y <= SCR_CHANGE_H:
+                self.pos.y = SCR_CHANGE_H
+
         self.rect.midbottom = self.pos
 
     def animation(self):
         time_passed = pygame.time.get_ticks()
+        # We define when the player is considered to be moving
         if self.vel.x != 0:
             self.walking = True
         else:
             self.walking = False
 
         # Show walking animation
-        if self.walking and not self.has_jetpack:
+        if self.walking and not self.has_jetpack and not self.has_wings:
             if time_passed - self.last_update > 140:
                 self.last_update = time_passed
                 if self.has_bubble:
@@ -187,8 +220,9 @@ class Player(pygame.sprite.Sprite):
                         self.image = self.walking_frames_L[self.current_frame]
                 self.rect = self.image.get_rect()
                 self.rect.bottom = rect_bottom
+
         # Show jumping animation
-        if self.jumping and not self.walking and not self.has_jetpack:
+        if self.jumping and not self.walking and not self.has_jetpack and not self.has_wings:
             rect_bottom = self.rect.bottom
             if self.has_bubble:
                 self.image = self.jumping_frame_inv
@@ -198,7 +232,7 @@ class Player(pygame.sprite.Sprite):
             self.rect.bottom = rect_bottom
 
         # Show standing animation
-        if not self.jumping and not self.walking and not self.has_jetpack:
+        if not self.jumping and not self.walking and not self.has_jetpack and not self.has_wings:
             if time_passed - self.last_update > 350:
                 self.last_update = time_passed
                 if self.has_bubble:
@@ -212,8 +246,9 @@ class Player(pygame.sprite.Sprite):
                     self.image = self.standing_frames[self.current_frame]
                 self.rect = self.image.get_rect()
                 self.rect.bottom = rect_bottom
+
         # Show jetpack animation
-        if self.has_jetpack:
+        if self.has_jetpack and not self.has_wings:
             if time_passed - self.last_update > 50:
                 self.last_update = time_passed
                 if self.acceleration:
@@ -222,6 +257,15 @@ class Player(pygame.sprite.Sprite):
                 if self.still:
                     self.current_frame = (self.current_frame + 1) % len(self.jet_go_frames)
                     self.image = self.jet_go_frames[self.current_frame]
+        # Show wing animation
+        if self.has_wings:
+            if time_passed - self.last_update > 90:
+                self.last_update = time_passed
+                self.current_frame = (self.current_frame + 1) % len(self.has_wings_frames)
+                rect_center = self.rect.centerx
+                self.image = self.has_wings_frames[self.current_frame]
+                self.rect = self.image.get_rect()
+                self.rect.centerx = rect_center
 
         self.mask = pygame.mask.from_surface(self.image)
 
@@ -246,6 +290,7 @@ class Platform(pygame.sprite.Sprite):
         self.has_mob = False
         # Respawn property
         self.respawn = False
+        # Plat speed properties
         self.vel_x = 1
         self.vel_y = 1
         self.count_vel_y = 0
@@ -318,28 +363,29 @@ class Platform(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
 
-        # Applying the sprites spawning on platform
-        if random.randrange(100) < POW_SPAWN_RATIO and not game.player.has_bubble and not game.player.has_jetpack and \
-                not self.on_move_y:
-            Powerup(self.game, self)
-            self.has_pow = True
-        if random.randrange(100) < COIN_SPAWN_RATIO:
-            Coin(self.game, self)
-            self.has_coin = True
-        if random.randrange(100) < SPIKEY_SPAWN_RATIO and self.image == normal_images[
-            0] and not self.on_move and not self.has_mob:
-            Spikey(self.game, self)
-            self.has_spikey = True
-            self.has_mob = True
-        if random.randrange(100) < CLOUD_SPAWN_RATIO and not self.on_move and not self.has_mob:
-            Cloud(self.game, self)
-            self.has_cloud = True
-            self.has_mob = True
-        if random.randrange(100) < WM_SPAWN_RATIO and self.image == normal_images[
-            0] and not self.on_move and not self.has_mob:
-            Wingman(self.game, self)
-            self.has_wingman = True
-            self.has_mob = True
+        # Applying the sprites spawning on platform if wing pow is not initiated
+        if not self.game.player.has_wings:
+            if random.randrange(100) < POW_SPAWN_RATIO and not game.player.has_bubble and not game.player.has_jetpack \
+                    and not self.on_move_y:
+                Powerup(self.game, self)
+                self.has_pow = True
+            if random.randrange(100) < COIN_SPAWN_RATIO:
+                Coin(self.game, self)
+                self.has_coin = True
+            if random.randrange(100) < SPIKEY_SPAWN_RATIO and self.image == normal_images[0] and not self.on_move \
+                    and not self.has_mob:
+                Spikey(self.game, self)
+                self.has_spikey = True
+                self.has_mob = True
+            if random.randrange(100) < CLOUD_SPAWN_RATIO and not self.on_move and not self.has_mob:
+                Cloud(self.game, self)
+                self.has_cloud = True
+                self.has_mob = True
+            if random.randrange(100) < WM_SPAWN_RATIO and self.image == normal_images[0] and not self.on_move \
+                    and not self.has_mob:
+                Wingman(self.game, self)
+                self.has_wingman = True
+                self.has_mob = True
 
     def update(self, *args):
         # Moving left/right
@@ -366,13 +412,15 @@ class Powerup(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.plat = plat
-        self.type = choice(['boost', 'bubble', 'jetpack'])
+        self.type = choice(['boost', 'bubble', 'jetpack', 'wings'])
         if self.type == 'boost':
             self.image = self.game.spritesheet1.get_image(820, 1805, 71, 70)
         elif self.type == 'bubble':
             self.image = self.game.spritesheet1.get_image(826, 134, 71, 70)
         elif self.type == 'jetpack':
             self.image = self.game.spritesheet1.get_image(852, 1089, 65, 77)
+        elif self.type == 'wings':
+            self.image = self.game.spritesheet1.get_image(826, 1292, 71, 70)
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.centerx = self.plat.rect.centerx
@@ -757,7 +805,10 @@ class Sun(pygame.sprite.Sprite):
         self.image = self.images[0]
         self.rect = self.image.get_rect()
         # Applying y and x pos
-        self.rect.centerx = random.choice([-100, WIDTH + 100])
+        if self.game.player.has_wings:
+            self.rect.centerx = random.randrange(70, WIDTH - 70)
+        else:
+            self.rect.centerx = random.choice([-100, WIDTH + 100])
         self.rect.y = random.choice([-100, -75])
         # The vel is so that when everything gets moved to the bottom our sun moves slower to make the game challenging
         # The vel isn't found anywhere in the class.It is in the game in flying mobs
@@ -769,13 +820,16 @@ class Sun(pygame.sprite.Sprite):
     def update(self, *args):
         # Apply animation
         self.animation()
-        # Apply constant movement
-        self.rect.x += self.vel_x
-        # Changing the direction
-        if self.rect.right > WIDTH - 5:
-            self.vel_x = -SUN_VEL
-        if self.rect.left < 5:
-            self.vel_x = SUN_VEL
+        if self.game.player.has_wings:
+            self.vel_y = 0
+        else:
+            # Apply constant movement
+            self.rect.x += self.vel_x
+            # Changing the direction
+            if self.rect.right > WIDTH - 5:
+                self.vel_x = -SUN_VEL
+            if self.rect.left < 5:
+                self.vel_x = SUN_VEL
         # Killing the sprite if it is off the screen
         if self.rect.y > HEIGHT:
             self.kill()
