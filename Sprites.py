@@ -16,13 +16,14 @@ class Spritesheet1:
         # Grab an image out of a spritesheet
         image = pygame.Surface((width, height))
         image.blit(self.spritesheet1, (0, 0), (x, y, width, height))
+        # We divide width and height by 2 cuz the spritesheet is too big for us
         image = pygame.transform.scale(image, (width // 2, height // 2))
         return image
 
 
-def Get_image_res(image):
+def Get_image_res(image, resize_ratio):
     width, height = image.get_size()
-    image = pygame.transform.scale(image, (width // 2, height // 2))
+    image = pygame.transform.scale(image, (width // resize_ratio, height // resize_ratio))
     return image
 
 
@@ -38,7 +39,7 @@ class Button(pygame.sprite.Sprite):
         self.game.screen.blit(self.image, self.rect)
 
     def draw_txt(self, text, size, color):
-        font = pygame.font.Font(self.game.font_name, size)
+        font = pygame.font.Font('fonts/AmaticSC-Bold.ttf', size)
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect()
         text_rect.center = self.rect.center
@@ -81,8 +82,8 @@ class Player(pygame.sprite.Sprite):
         # Standing frames for 2 cases:default and invincible
         self.standing_frames = [self.game.spritesheet1.get_image(614, 1063, 120, 191),
                                 self.game.spritesheet1.get_image(690, 406, 120, 201)]
-        self.standing_frames_inv = [Get_image_res(pygame.image.load('graphics/bunny1_inv_stand.png')),
-                                    Get_image_res(pygame.image.load('graphics/bunny1_inv_ready.png'))]
+        self.standing_frames_inv = [Get_image_res(pygame.image.load('graphics/bunny1_inv_stand.png'), 2),
+                                    Get_image_res(pygame.image.load('graphics/bunny1_inv_ready.png'), 2)]
         # Clearing the black square around the frames
         for frame in self.standing_frames:
             frame.set_colorkey(BLACK)
@@ -91,8 +92,8 @@ class Player(pygame.sprite.Sprite):
         # Walking frames for 2 cases
         self.walking_frames_R = [self.game.spritesheet1.get_image(678, 860, 120, 201),
                                  self.game.spritesheet1.get_image(692, 1458, 120, 207)]
-        self.walking_frames_inv_R = [Get_image_res(pygame.image.load('graphics/bunny1_inv_walk1.png')),
-                                     Get_image_res(pygame.image.load('graphics/bunny1_inv_walk2.png'))]
+        self.walking_frames_inv_R = [Get_image_res(pygame.image.load('graphics/bunny1_inv_walk1.png'), 2),
+                                     Get_image_res(pygame.image.load('graphics/bunny1_inv_walk2.png'), 2)]
         self.walking_frames_L = []
         self.walking_frames_inv_L = []
         # Applying the L frames in both cases
@@ -105,39 +106,38 @@ class Player(pygame.sprite.Sprite):
             # 1 - horisontal , 2 - vertical
             self.walking_frames_inv_L.append(pygame.transform.flip(frame, True, False))
         # Player/jetpack images
-        self.jet_start_frames = [Get_image_res(pygame.image.load('graphics/player_jet_start1.png')),
-                                 Get_image_res(pygame.image.load('graphics/player_jet_start2.png'))]
+        self.jet_start_frames = [Get_image_res(pygame.image.load('graphics/player_jet_start1.png'), 2),
+                                 Get_image_res(pygame.image.load('graphics/player_jet_start2.png'), 2)]
         for image in self.jet_start_frames:
             image.set_colorkey(BLACK)
-        self.jet_go_frames = [Get_image_res(pygame.image.load('graphics/player_jet1.png')),
-                              Get_image_res(pygame.image.load('graphics/player_jet2.png'))]
+        self.jet_go_frames = [Get_image_res(pygame.image.load('graphics/player_jet1.png'), 2),
+                              Get_image_res(pygame.image.load('graphics/player_jet2.png'), 2)]
         for image in self.jet_go_frames:
             image.set_colorkey(BLACK)
         # Player with wings images
-        self.has_wings_frames = [Get_image_res(pygame.image.load('graphics/player_fly1.png')),
-                                 Get_image_res(pygame.image.load('graphics/player_fly2.png')),
-                                 Get_image_res(pygame.image.load('graphics/player_fly3.png')),
-                                 Get_image_res(pygame.image.load('graphics/player_fly4.png')),
-                                 Get_image_res(pygame.image.load('graphics/player_fly5.png'))]
-        # Setting the jumping frame for both cases and removing the black squares
+        self.has_wings_frames = [Get_image_res(pygame.image.load('graphics/player_fly1.png'), 2),
+                                 Get_image_res(pygame.image.load('graphics/player_fly2.png'), 2),
+                                 Get_image_res(pygame.image.load('graphics/player_fly3.png'), 2),
+                                 Get_image_res(pygame.image.load('graphics/player_fly4.png'), 2),
+                                 Get_image_res(pygame.image.load('graphics/player_fly5.png'), 2)]
+        # Jump frames
         self.jumping_frame = self.game.spritesheet1.get_image(382, 763, 150, 181)
         self.jumping_frame.set_colorkey(BLACK)
-        self.jumping_frame_inv = Get_image_res(pygame.image.load('graphics/bunny1_inv_jump.png'))
-        pygame.transform.scale(self.jumping_frame_inv, (211 // 2, 215 // 2))
+        self.jumping_frame_inv = Get_image_res(pygame.image.load('graphics/bunny1_inv_jump.png'), 2)
 
     def jump(self):
         # Jump only if standing on a platform and without a pow
         self.rect.x += 2
         hits = pygame.sprite.spritecollide(self, self.game.platforms, False)
         self.rect.x -= 2
-        if hits and not self.jumping and not self.has_jetpack and not self.has_wings:
+        if hits and not self.jumping and not self.has_jetpack and not self.has_wings and not self.has_bubble:
             self.jumping = True
             self.vel.y = -PLAYER_JUMP_V
             #self.game.jump_sound.play()
 
     def jump_cut(self):
         # The code that cuts the jump
-        if self.jumping and not self.has_jetpack and not self.has_wings:
+        if self.jumping and not self.has_jetpack and not self.has_wings and not self.has_bubble:
             if self.vel.y < -10:
                 self.vel.y = -10
 
@@ -308,8 +308,8 @@ class Platform(pygame.sprite.Sprite):
         # Platform images
         snowy_images = [self.game.spritesheet1.get_image(0, 768, 380, 94),
                         self.game.spritesheet1.get_image(213, 1764, 201, 100)]
-        icy_images = [Get_image_res(pygame.image.load('graphics/ice_plat_l.png')),
-                      Get_image_res(pygame.image.load('graphics/ice_plat_s.png'))]
+        icy_images = [Get_image_res(pygame.image.load('graphics/ice_plat_l.png'), 2),
+                      Get_image_res(pygame.image.load('graphics/ice_plat_s.png'), 2)]
         normal_images = [self.game.spritesheet1.get_image(0, 288, 380, 94),
                          self.game.spritesheet1.get_image(213, 1662, 201, 100)]
         stone_images = [self.game.spritesheet1.get_image(0, 96, 380, 94),
@@ -321,25 +321,25 @@ class Platform(pygame.sprite.Sprite):
         sand_images = [self.game.spritesheet1.get_image(0, 672, 380, 94),
                        self.game.spritesheet1.get_image(208, 1879, 201, 100)]
         # Platform choices
-        if 750 > self.game.score >= 0:
+        if PLAT_STONE_START > self.game.score >= PLAT_NM_START:
             if random.randrange(100) < 90:
                 self.type = 'normal'
             else:
                 self.type = 'sand'
             # self.type = choice(['wooden', 'snowy'])
-        if 1600 > self.game.score >= 750:
+        if PLAT_PINK_START > self.game.score >= PLAT_STONE_START:
             if random.randrange(100) < 90:
                 self.type = 'stone'
             else:
                 self.type = 'sand'
             # self.type = choice(['stone', 'snowy'])
-        if 3200 > self.game.score >= 1600:
-            if random.randrange(100) < 79:
+        if PLAT_SNOW_START > self.game.score >= PLAT_PINK_START:
+            if random.randrange(100) < 90:
                 self.type = 'pink'
             else:
                 self.type = 'icy'
             # self.type = choice(['pink', 'snowy'])
-        if self.game.score >= 3200:
+        if self.game.score >= PLAT_SNOW_START:
             self.type = choice(['icy', 'snowy'])
 
         # Platform images attachment
@@ -366,26 +366,29 @@ class Platform(pygame.sprite.Sprite):
         # Applying the sprites spawning on platform if wing pow is not initiated
         if not self.game.player.has_wings:
             if random.randrange(100) < POW_SPAWN_RATIO and not game.player.has_bubble and not game.player.has_jetpack \
-                    and not self.on_move_y:
+                    and len(self.game.powerups) == 0 and self.game.score != 0 and not self.on_move_y:
                 Powerup(self.game, self)
                 self.has_pow = True
             if random.randrange(100) < COIN_SPAWN_RATIO:
                 Coin(self.game, self)
                 self.has_coin = True
-            if random.randrange(100) < SPIKEY_SPAWN_RATIO and self.image == normal_images[0] and not self.on_move \
-                    and not self.has_mob:
-                Spikey(self.game, self)
-                self.has_spikey = True
-                self.has_mob = True
-            if random.randrange(100) < CLOUD_SPAWN_RATIO and not self.on_move and not self.has_mob:
-                Cloud(self.game, self)
-                self.has_cloud = True
-                self.has_mob = True
-            if random.randrange(100) < WM_SPAWN_RATIO and self.image == normal_images[0] and not self.on_move \
-                    and not self.has_mob:
-                Wingman(self.game, self)
-                self.has_wingman = True
-                self.has_mob = True
+            # There shouldn't be 2 much mobs
+            if len(self.game.mobs) < 3:
+                if random.randrange(100) < SPIKEY_SPAWN_RATIO and self.image == normal_images[0] and not self.on_move \
+                        and not self.has_mob and PLAT_SNOW_START > self.game.score > SPIKEY_SPAWN_SCORE:
+                    Spikey(self.game, self)
+                    self.has_spikey = True
+                    self.has_mob = True
+                if random.randrange(100) < CLOUD_SPAWN_RATIO and not self.on_move and not self.has_mob and \
+                        self.game.score > PLAT_STONE_START:
+                    Cloud(self.game, self)
+                    self.has_cloud = True
+                    self.has_mob = True
+                if random.randrange(100) < WM_SPAWN_RATIO and (self.image == pink_images[0] or self.image == snowy_images[0]) and not self.on_move \
+                        and not self.has_mob and self.game.score > PLAT_PINK_START:
+                    Wingman(self.game, self)
+                    self.has_wingman = True
+                    self.has_mob = True
 
     def update(self, *args):
         # Moving left/right
@@ -412,7 +415,16 @@ class Powerup(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.plat = plat
-        self.type = choice(['boost', 'bubble', 'jetpack', 'wings'])
+        # We define the type as boost and then we change it if needed
+        self.type = 'boost'
+        self.spawn_score = 0
+        self.spawn_ratio = random.randrange(100)
+        if 20 < self.spawn_ratio < 50:
+            self.type = 'bubble'
+        elif 7 < self.spawn_ratio < 20:
+            self.type = 'wings'
+        elif 0 < self.spawn_ratio < 7:
+            self.type = 'jetpack'
         if self.type == 'boost':
             self.image = self.game.spritesheet1.get_image(820, 1805, 71, 70)
         elif self.type == 'bubble':
@@ -423,8 +435,10 @@ class Powerup(pygame.sprite.Sprite):
             self.image = self.game.spritesheet1.get_image(826, 1292, 71, 70)
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
+        # Position of the pow
         self.rect.centerx = self.plat.rect.centerx
         self.rect.bottom = self.plat.rect.top - 2
+        # Jumping var
         self.jumpCount = 1.2
 
     def update(self):
@@ -464,16 +478,19 @@ class Coin(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.plat = plat
+        # Animation properties
         self.last_update = 0
         self.current_frame = 0
         self.load_images()
         self.image = self.gold_images[0]
         self.rect = self.image.get_rect()
+        # Position
         self.rect.centerx = self.plat.rect.centerx
         self.rect.bottom = self.plat.rect.top - 5
-        if 900 > self.game.score >= 0:
+        # Images depending on the score
+        if PLAT_STONE_START > self.game.score >= 0:
             self.type = 'bronze'
-        elif 1800 > self.game.score > 900:
+        elif PLAT_PINK_START > self.game.score > PLAT_STONE_START:
             self.type = 'silver'
         else:
             self.type = 'gold'
@@ -520,6 +537,7 @@ class Coin(pygame.sprite.Sprite):
             self.rect = self.image.get_rect()
             self.rect.centerx = self.plat.rect.centerx
             self.rect.bottom = self.plat.rect.top - 5
+        # We kill the sprite when the plat is killed
         if not self.game.platforms.has(self.plat):
             self.kill()
             self.plat.has_coin = False
@@ -531,26 +549,31 @@ class Flyman(pygame.sprite.Sprite):
         self.groups = game.all_sprites, game.mobs
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
+        # Images and animation
         self.image_up = self.game.spritesheet1.get_image(566, 510, 122, 139)
         self.image_up.set_colorkey(BLACK)
         self.image_down = self.game.spritesheet1.get_image(568, 1534, 122, 135)
         self.image_down.set_colorkey(BLACK)
         self.image = self.image_up
         self.rect = self.image.get_rect()
+        # Position
         self.rect.centerx = random.choice([-100, WIDTH + 100])
+        self.rect.y = HEIGHT / 3
+        # Move properties
         self.velx = random.randrange(1, 4)
         self.vely = 0
         self.dy = 0.5
-        if self.rect.centerx > WIDTH:
-            self.velx *= -1
-        self.rect.y = random.randrange(HEIGHT / 3)
 
     def update(self):
+        # We apply movement
         self.rect.x += self.velx
         self.vely += self.dy
+        self.rect.y += self.vely
+        # We apply up and down movement
         if self.vely > 3 or self.vely < -3:
             self.dy *= -1
         rect_center = self.rect.center
+        # We apply animation
         if self.dy < 0:
             self.image = self.image_up
         else:
@@ -558,15 +581,16 @@ class Flyman(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.center = rect_center
-        self.rect.y += self.vely
+        # The sprite moves left and right until it is off HEIGHT
         if self.rect.left > WIDTH + 100 or self.rect.right < -100:
             self.velx *= -1
+        # Killing the sprite
         if self.rect.centery > HEIGHT + 100:
             self.game.has_flyman = False
             self.kill()
 
 
-class Cloud_bg(pygame.sprite.Sprite):
+class CloudBG(pygame.sprite.Sprite):
     def __init__(self, game):
         self._layer = CLOUD_LAYER
         self.groups = game.all_sprites, game.clouds
@@ -600,7 +624,6 @@ class Spikey(pygame.sprite.Sprite):
         self.rect.centerx = self.plat.rect.centerx
         self.rect.bottom = self.plat.rect.top - 1
         self.acc_x = SPIKEY_ACC
-        # self.vel_x = 0
         self.facing_left = False
         self.facing_right = True
 
@@ -622,23 +645,16 @@ class Spikey(pygame.sprite.Sprite):
         # Applying constant movement
         if self.facing_left or self.facing_right:
             self.rect.x += self.acc_x
-            # self.acc_x += self.vel_x
         # Moving from right to left
         if self.rect.right > self.plat.rect.right:
             self.facing_right = False
             self.facing_left = True
             self.acc_x = -SPIKEY_ACC
-            # self.vel_x = 0
-        """if self.rect.right > self.plat.rect.right - 8 and self.facing_right:
-            self.vel_x = -0.04"""
         # Moving from left to right
         if self.rect.left < self.plat.rect.left:
             self.facing_right = True
             self.facing_left = False
             self.acc_x = SPIKEY_ACC
-            # self.vel_x = 0
-        """if self.rect.left < self.plat.rect.left + 8 and self.facing_left:
-            self.vel_x = 0.04"""
         # Killing the sprite when it disappears off the screen
         if self.rect.top > HEIGHT:
             self.kill()
@@ -672,10 +688,10 @@ class Cloud(pygame.sprite.Sprite):
         self.plat = plat
         # Defining the images
         self.images = [self.game.spritesheet1.get_image(0, 1152, 260, 134),
-                       Get_image_res(pygame.image.load('graphics/Cloud1.png')),
-                       Get_image_res(pygame.image.load('graphics/Cloud2.png')),
-                       Get_image_res(pygame.image.load('graphics/Cloud3.png')),
-                       Get_image_res(pygame.image.load('graphics/Cloud4.png'))]
+                       Get_image_res(pygame.image.load('graphics/Cloud1.png'), 2),
+                       Get_image_res(pygame.image.load('graphics/Cloud2.png'), 2),
+                       Get_image_res(pygame.image.load('graphics/Cloud3.png'), 2),
+                       Get_image_res(pygame.image.load('graphics/Cloud4.png'), 2)]
         self.image = self.images[0]
         self.rect = self.image.get_rect()
         self.rect.centerx = self.plat.rect.centerx
@@ -707,6 +723,29 @@ class Cloud(pygame.sprite.Sprite):
             self.plat.has_mob = False
 
 
+# Spawns ony with a cloud
+class Lightining(pygame.sprite.Sprite):
+    def __init__(self, game, cloud):
+        self._layer = MOB_LAYER
+        self.groups = game.all_sprites, game.mobs, game.lightinings
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.cloud = cloud
+        self.image = self.game.spritesheet1.get_image(895, 453, 55, 114)
+        # Rare gold lightining
+        if random.randrange(100.0) < 1.5:
+            self.image = self.game.spritesheet1.get_image(897, 0, 55, 114)
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.top = self.cloud.rect.bottom - 2
+        self.rect.centerx = self.cloud.rect.centerx - 5
+
+    def update(self, *args):
+        # Kill if the peak image is gone
+        if self.cloud.image != self.cloud.images[4] or self.rect.top > HEIGHT:
+            self.kill()
+
+
 class Wingman(pygame.sprite.Sprite):
     def __init__(self, game, plat):
         self._layer = MOB_LAYER
@@ -728,13 +767,13 @@ class Wingman(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.centerx = self.plat.rect.centerx
         self.rect.centery = self.plat.rect.centery
+        # Move properties
         self.acc_y = WM_ACC_UP
         self.vel_y = 0
         self.current_frame = 0
         self.last_update = 0
         self.facing_up = True
         self.facing_down = False
-        self.R = 0
 
     def update(self, *args):
         self.animation()
@@ -790,7 +829,7 @@ class Sun(pygame.sprite.Sprite):
         self.groups = game.all_sprites, game.flying_mobs
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        # Applying sun types according to bioms
+        # Applying sun types according to the score
         self.type = 'sun'
         if 1500 > self.game.score > SUN_SPAWN_SCORE:
             self.type = 'moon'
@@ -842,24 +881,3 @@ class Sun(pygame.sprite.Sprite):
             self.current_frame = (self.current_frame + 1) % len(self.images)
             self.image = self.images[self.current_frame]
 
-
-class Lightining(pygame.sprite.Sprite):
-    def __init__(self, game, cloud):
-        self._layer = MOB_LAYER
-        self.groups = game.all_sprites, game.mobs, game.lightinings
-        pygame.sprite.Sprite.__init__(self, self.groups)
-        self.game = game
-        self.cloud = cloud
-        self.image = self.game.spritesheet1.get_image(895, 453, 55, 114)
-        # Rare gold lightining
-        if random.randrange(100.0) < 1.5:
-            self.image = self.game.spritesheet1.get_image(897, 0, 55, 114)
-        self.image.set_colorkey(BLACK)
-        self.rect = self.image.get_rect()
-        self.rect.top = self.cloud.rect.bottom - 2
-        self.rect.centerx = self.cloud.rect.centerx - 5
-
-    def update(self, *args):
-        # Kill if the peak image is gone
-        if self.cloud.image != self.cloud.images[4] or self.rect.top > HEIGHT:
-            self.kill()

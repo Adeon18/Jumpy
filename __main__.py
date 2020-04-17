@@ -41,10 +41,9 @@ class Game:
 
         # Load spritesheet image
         self.spritesheet1 = Spritesheet1(path.join(self.dir, SPRITESHEET1))
-        img_dir = path.join(self.dir, 'images')
+        img_dir = path.join(self.dir, 'graphics')
         # Bg images
         self.bg_menu = pygame.image.load('bg_menu.png')
-        self.bg_menu1 = pygame.image.load('bg_menu1.png')
         # Button images
         self.menu_b1 = Button(self, WIDTH // 2, HEIGHT // 2 + 56)
         self.menu_b2 = Button(self, WIDTH // 2, HEIGHT // 2 + 56 * 2)
@@ -53,7 +52,7 @@ class Game:
         # Cloud images
         self.cloud_images = []
         for i in range(1, 4):
-            self.cloud_images.append(pygame.image.load(path.join(img_dir, 'cloud{}.png'.format(i))).convert())
+            self.cloud_images.append(pygame.image.load(path.join(img_dir, 'cloud_bg{}.png'.format(i))).convert())
         # Load Sound
         self.sound_dir = path.join(self.dir, 'Sounds')
         self.jump_sound = pygame.mixer.Sound(path.join(self.sound_dir, 'Jump33.wav'))
@@ -90,8 +89,8 @@ class Game:
         self.color_change = False
         # Music
         #pygame.mixer.music.load(path.join(self.sound_dir, 'Happy Tune.ogg'))
-        for i in range(10):
-            c = Cloud_bg(self)
+        for i in range(6):
+            c = CloudBG(self)
             c.rect.y += 500
         self.run()
 
@@ -153,7 +152,7 @@ class Game:
                 for hit in hits:
                     if hit.rect.bottom > lowest_plat.rect.bottom:
                         lowest_plat = hit
-
+                # Applying the plat borders where you can walk
                 if lowest_plat.rect.left - 10 < self.player.pos.x < lowest_plat.rect.right + 10:
                     if self.player.pos.y < lowest_plat.rect.centery - 3:
                         self.player.pos.y = lowest_plat.rect.top
@@ -174,7 +173,7 @@ class Game:
         # If player reaches the 1/4 of the screen
         if self.player.rect.top <= SCR_CHANGE_H:
             if random.randrange(100) < CLOUD_BG_SPAWN_RATIO:
-                Cloud_bg(self)
+                CloudBG(self)
             self.player.pos.y += max(abs(self.player.vel.y), 3)
             # Move the clouds further down
             for cloud in self.clouds:
@@ -330,7 +329,7 @@ class Game:
         self.fade()
         self.all_sprites.draw(self.screen)
         self.draw_text(str(self.score), 32, BLACK, WIDTH / 2, 15)
-        self.draw_text('Coins: ' + str(self.coin_amount), 32, BLACK, 50, 15)
+        self.draw_text('Coins: ' + str(self.coin_amount), 32, BLACK, 60, 15)
         # *after* drawing everything, flip the display
         pygame.display.flip()
 
@@ -392,7 +391,7 @@ class Game:
         #pygame.mixer.music.play(loops=-1)
         self.screen.blit(self.bg_menu, (0, 0))
         self.draw_text('GAME OVER', 68, ALMOST_WHITE, WIDTH / 2, HEIGHT / 5)
-        self.draw_text('Score :' + str(self.score), 32, ALMOST_WHITE, WIDTH / 2, HEIGHT / 5 + 36)
+        self.draw_text('Score :' + str(self.score), 32, ALMOST_WHITE, WIDTH / 2, HEIGHT / 5 + 50)
         # Adjusting the buttons
         self.goscr_b1 = Button(self, WIDTH // 2, HEIGHT // 2 + 56)
         self.goscr_b2 = Button(self, WIDTH // 2, HEIGHT // 2 + 56 * 2)
@@ -403,11 +402,11 @@ class Game:
         # Draw the highscore count
         if self.score > self.highscore:
             self.highscore = self.score
-            self.draw_text('New high score!', 32, ALMOST_WHITE, WIDTH / 2, HEIGHT / 5 + 36 * 2)
+            self.draw_text('New high score!', 32, ALMOST_WHITE, WIDTH / 2, HEIGHT / 5 + 45 * 2)
             with open(path.join(self.dir, SAVES_FILE), 'w',) as f:
                 f.write(str(self.score))
         else:
-            self.draw_text('High score :' + str(self.highscore), 32, ALMOST_WHITE, WIDTH / 2, HEIGHT / 5 + 36 * 2)
+            self.draw_text('High score :' + str(self.highscore), 32, ALMOST_WHITE, WIDTH / 2, HEIGHT / 5 + 45 * 2)
 
         with open(path.join(self.dir, COIN_FILE), 'w',) as f:
             f.write(str(self.coin_amount))
@@ -439,7 +438,7 @@ class Game:
         pygame.mixer.music.fadeout(500)
 
     def draw_text(self, text, size, color, x, y):
-        font = pygame.font.Font(self.font_name, size)
+        font = pygame.font.Font('fonts/AmaticSC-Bold.ttf', size)
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect()
         text_rect.center = (x, y)

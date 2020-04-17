@@ -1,7 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4afb16a7-f2ef-4604-b7de-85a7a2e01c2a" name="Default Changelist" comment="FIXED a minor mistake" />
+    <list default="true" id="4afb16a7-f2ef-4604-b7de-85a7a2e01c2a" name="Default Changelist" comment="FIXED a minor mistake">
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/user.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/user.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Saves" beforeDir="false" afterPath="$PROJECT_DIR$/Saves" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sprites.py" beforeDir="false" afterPath="$PROJECT_DIR$/Sprites.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/__main__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bg_menu1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/coins" beforeDir="false" afterPath="$PROJECT_DIR$/coins" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/bunny1_inv_sad.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/jetpack1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/jetpack2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/jetpack_start1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/jetpack_start2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/cloud1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/cloud2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/cloud3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/Cloud1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/Cloud2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/Cloud3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/Cloud4.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/SPRITESHEETV3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/SPRITESHEETV31.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/Spritesheet2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/XML.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/bg_menu.psd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/bg_menu1.psd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/ice_plat_l.psd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/ice_plat_lc.psd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/ice_plat_s.psd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/ice_plat_sc.psd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/jetpack1.psd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/jetpack2.psd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/jetpack_start1.psd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/jetpack_start2.psd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/player_fly1.psd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/player_fly2.psd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/player_fly3.psd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/player_fly4.psd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/player_fly5.psd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/player_jet1.psd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/player_jet2.psd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/player_jet_start1.psd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/player_jet_start2.psd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/Безымянный-1.ai" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/Безымянный-2.ai" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/Безымянный-3.ai" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/some shit/Безымянный-4.ai" beforeDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
