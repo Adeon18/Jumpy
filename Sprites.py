@@ -133,7 +133,7 @@ class Player(pygame.sprite.Sprite):
         if hits and not self.jumping and not self.has_jetpack and not self.has_wings and not self.has_bubble:
             self.jumping = True
             self.vel.y = -PLAYER_JUMP_V
-            #self.game.jump_sound.play()
+            self.game.jump_sound.play()
 
     def jump_cut(self):
         # The code that cuts the jump
@@ -715,6 +715,7 @@ class Cloud(pygame.sprite.Sprite):
             self.image = self.images[self.current_frame]
         # Spawning the lightining at the peak image
         if self.image == self.images[4] and len(self.game.lightinings) < 4:
+            self.game.lightining_sound.play()
             Lightining(self.game, self)
         # Killing the sprite when it dissapears off the screen
         if self.rect.top > HEIGHT:

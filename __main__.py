@@ -1,14 +1,13 @@
-# My game
-# Sound and Music
+# Game by - Adeon18
+# Sound and Music - @romanpelino
 # Art from Kenney.nl
-# Happy Tune by http://opengameart.org/users/syncopika
-# Yippee by http://opengameart.org/users/snabisch
 
 import pygame
 import random
 from settings import *
 from Sprites import *
 from os import path
+
 
 class Game:
     def __init__(self):
@@ -55,8 +54,23 @@ class Game:
             self.cloud_images.append(pygame.image.load(path.join(img_dir, 'cloud_bg{}.png'.format(i))).convert())
         # Load Sound
         self.sound_dir = path.join(self.dir, 'Sounds')
-        self.jump_sound = pygame.mixer.Sound(path.join(self.sound_dir, 'Jump33.wav'))
-        self.boost_sound = pygame.mixer.Sound(path.join(self.sound_dir, 'Boost16.wav'))
+        self.jump_sound = pygame.mixer.Sound(path.join(self.sound_dir, 'jump.wav'))
+        self.jump_sound.set_volume(0.2)
+        self.boost_sound = pygame.mixer.Sound(path.join(self.sound_dir, 'boost.wav'))
+        self.boost_sound.set_volume(0.7)
+        self.bubble_sound = pygame.mixer.Sound(path.join(self.sound_dir, 'bubble.wav'))
+        self.bubble_pop_sound = pygame.mixer.Sound(path.join(self.sound_dir, 'bubble_pop.wav'))
+        self.coin_sound = pygame.mixer.Sound(path.join(self.sound_dir, 'coin.wav'))
+        self.wings_sound = pygame.mixer.Sound(path.join(self.sound_dir, 'wings.wav'))
+        self.wings_sound.set_volume(0.3)
+        self.flyman_sound = pygame.mixer.Sound(path.join(self.sound_dir, 'flyman.wav'))
+        self.flyman_sound.set_volume(0.4)
+        self.jetpack_sound = pygame.mixer.Sound(path.join(self.sound_dir, 'jetpack.wav'))
+        self.jetpack_sound.set_volume(0.3)
+        self.lightining_sound = pygame.mixer.Sound(path.join(self.sound_dir, 'lightning.wav'))
+        self.lightining_sound.set_volume(0.3)
+        self.button_sound = pygame.mixer.Sound(path.join(self.sound_dir, 'button.wav'))
+        self.button_sound.set_volume(0.5)
 
     def new(self):
         # start a new game
@@ -87,8 +101,8 @@ class Game:
         self.second_fade = False
         self.third_fade = False
         self.color_change = False
-        # Music
-        #pygame.mixer.music.load(path.join(self.sound_dir, 'Happy Tune.ogg'))
+        # Sounds
+        self.wings_sound.set_volume(0.3)
         for i in range(6):
             c = CloudBG(self)
             c.rect.y += 500
@@ -96,7 +110,6 @@ class Game:
 
     def run(self):
         # Game Loop
-        #pygame.mixer.music.play(loops=-1)
         self.playing = True
         while self.playing:
             self.clock.tick(FPS)
@@ -116,6 +129,7 @@ class Game:
                 < HEIGHT - 50 and not self.has_flyman and SUN_SPAWN_SCORE > self.score > FLYMAN_SPAWN_SCORE:
             self.mob_timer = time_passed
             if random.randrange(100) < FLYMAN_SPAWN_RATIO:
+                self.flyman_sound.play()
                 Flyman(self)
                 self.has_flyman = True
         # Spawn a Sun without wing powerup
@@ -137,11 +151,14 @@ class Game:
         mob_hits = pygame.sprite.spritecollide(self.player, self.mobs, False)
         if mob_hits and not self.player.has_bubble and not self.player.has_jetpack:
             if pygame.sprite.spritecollide(self.player, self.mobs, False, pygame.sprite.collide_mask):
+                # We stop the wing sound
+                self.wings_sound.set_volume(0)
                 self.playing = False
         # Hit flying mobs
         f_mob_hits = pygame.sprite.spritecollide(self.player, self.flying_mobs, False)
         if f_mob_hits and not self.player.has_bubble and not self.player.has_jetpack:
             if pygame.sprite.spritecollide(self.player, self.flying_mobs, False, pygame.sprite.collide_mask):
+                self.wings_sound.set_volume(0)
                 self.playing = False
 
         # check if player hits a platform - only if falling
@@ -222,6 +239,7 @@ class Game:
         for coin in self.coins:
             coin_hits = pygame.sprite.spritecollide(self.player, self.coins, True)
             if coin_hits:
+                self.coin_sound.play()
                 if coin.type == 'bronze':
                     self.coin_amount += 1
                 elif coin.type == 'silver':
@@ -234,10 +252,11 @@ class Game:
         for hit in powerup_hits:
             # Only 1 pow can be taken at a time
             if hit.type == 'boost' and not (self.player.has_jetpack or self.player.has_bubble or self.player.has_wings):
-                #self.boost_sound.play()
+                self.boost_sound.play()
                 self.player.vel.y = -BOOST_POWER
                 self.player.jumping = False
             elif hit.type == 'bubble' and not (self.player.has_jetpack or self.player.has_wings):
+                self.bubble_sound.play()
                 self.player.has_bubble = True
                 self.player.jumping = False
                 self.bubble_score = 0
@@ -250,6 +269,7 @@ class Game:
 
         # Wings mechanics
         if self.player.has_wings:
+            self.wings_sound.play()
             # We accelerate
             self.player.vel.y -= BUBBLE_ACC
             # Keeping the speed once we accelerated
@@ -276,10 +296,12 @@ class Game:
                 self.player.vel.y += BUBBLE_ACC
             # Slowing down
             if self.bubble_score >= BUBBLE_END_SCORE:
+                self.bubble_pop_sound.play()
                 self.player.has_bubble = False
 
         # Jetpack mechanics:
         if self.player.has_jetpack:
+            self.jetpack_sound.play()
             # We accelerate
             self.player.acceleration = True
             self.player.vel.y -= JETPACK_ACC
@@ -335,14 +357,14 @@ class Game:
 
     def show_start_screen(self):
         # game splash/start screen
-        #pygame.mixer.music.load(path.join(self.sound_dir, 'Yippee.ogg'))
-        #pygame.mixer.music.play(loops=-1)
+        pygame.mixer.music.load(path.join(self.sound_dir, 'bg_music.ogg'))
+        pygame.mixer.music.play(loops=-1)
         self.screen.blit(self.bg_menu, (0, 0))
         self.draw_text(TITLE, 68, ALMOST_WHITE, WIDTH / 2, HEIGHT / 4)
         self.menu.draw(self.screen)
         self.menu_b1.draw_txt('Play', 32, ALMOST_WHITE)
         self.menu_b2.draw_txt('Tutorial', 32, ALMOST_WHITE)
-        self.menu_b3.draw_txt('Settings', 32, ALMOST_WHITE)
+        self.menu_b3.draw_txt('Exit', 32, ALMOST_WHITE)
         self.draw_text('High score :' + str(self.highscore), 32, ALMOST_WHITE, WIDTH / 2, 15)
 
         def wait_for_key_startscr():
@@ -360,24 +382,29 @@ class Game:
                         if self.menu_b1.rect.collidepoint(pos):
                             waiting = False
                             pygame.mouse.set_visible(False)
+                            self.button_sound.play()
                         elif self.menu_b2.rect.collidepoint(pos):
                             self.show_tutorial_screen()
+                            self.button_sound.play()
+                        elif self.menu_b3.rect.collidepoint(pos):
+                            waiting = False
+                            self.running = False
                         elif self.tut_b.rect.collidepoint(pos):
                             waiting = False
                             self.tut_b.kill()
                             self.show_start_screen()
         pygame.display.flip()
         wait_for_key_startscr()
-        pygame.mixer.music.fadeout(500)
+        pygame.mixer.music.fadeout(1000)
 
     def show_tutorial_screen(self):
         self.screen.blit(self.bg_menu, (0, 0))
         # Giving tutorial
         self.draw_text('Jumpy!', 72, ALMOST_WHITE, WIDTH / 2, HEIGHT / 10)
-        self.draw_text('A/D to move, W to jump', 32, (0,102,133), WIDTH / 2, HEIGHT / 3)
-        self.draw_text('Watch out for snowy platforms!', 32, (0,102,133), WIDTH / 2, HEIGHT / 3 + 36)
-        self.draw_text('Collect coins and exchange them for goods!', 32, (0,102,133), WIDTH / 2, HEIGHT / 3 + 36 * 2)
-        self.draw_text('Good Luck!:)', 32, (0,102,133), WIDTH / 2, HEIGHT / 2)
+        self.draw_text('A/D to move, W to jump', 32, (0, 102, 133), WIDTH / 2, HEIGHT / 3)
+        self.draw_text('Avoid mobs and collect coins', 32, (0, 102, 133), WIDTH / 2, HEIGHT / 3 + 36)
+        self.draw_text('Use powerups to get the highest score!', 32, (0, 102, 133), WIDTH / 2, HEIGHT / 3 + 36 * 2)
+        self.draw_text('Good Luck!:)', 32, (0, 102, 133), WIDTH / 2, HEIGHT / 2 + 10)
         # Creating a button
         self.tut_b = Button(self, WIDTH // 2, HEIGHT // 2 + 56 * 4)
         self.tut_b.draw_txt('Go back', 32, ALMOST_WHITE)
@@ -387,8 +414,8 @@ class Game:
         # game over/continue
         if not self.running:
             return
-        #pygame.mixer.music.load(path.join(self.sound_dir, 'Yippee.ogg'))
-        #pygame.mixer.music.play(loops=-1)
+        pygame.mixer.music.load(path.join(self.sound_dir, 'bg_music.ogg'))
+        pygame.mixer.music.play(loops=-1)
         self.screen.blit(self.bg_menu, (0, 0))
         self.draw_text('GAME OVER', 68, ALMOST_WHITE, WIDTH / 2, HEIGHT / 5)
         self.draw_text('Score :' + str(self.score), 32, ALMOST_WHITE, WIDTH / 2, HEIGHT / 5 + 50)
@@ -426,16 +453,19 @@ class Game:
                         if self.goscr_b1.rect.collidepoint(pos):
                             waiting = False
                             pygame.mouse.set_visible(False)
+                            self.button_sound.play()
                         if self.goscr_b2.rect.collidepoint(pos):
                             waiting = False
+                            self.button_sound.play()
                             self.show_start_screen()
                         elif self.goscr_b3.rect.collidepoint(pos):
                             waiting = False
                             self.running = False
+                            self.button_sound.play()
         # Draw the coin count
         pygame.display.flip()
         wait_for_key_goscr()
-        pygame.mixer.music.fadeout(500)
+        pygame.mixer.music.fadeout(1000)
 
     def draw_text(self, text, size, color, x, y):
         font = pygame.font.Font('fonts/AmaticSC-Bold.ttf', size)
