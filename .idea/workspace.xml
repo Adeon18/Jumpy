@@ -2,15 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4afb16a7-f2ef-4604-b7de-85a7a2e01c2a" name="Default Changelist" comment="FIXED a minor mistake">
-      <change beforePath="$PROJECT_DIR$/.idea/Python jumper.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Python jumper.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Saves" beforeDir="false" afterPath="$PROJECT_DIR$/Saves" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sounds/Boost16.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sounds/Happy Tune.ogg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sounds/Jump33.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sounds/Jump40.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sounds/Yippee.ogg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sounds/sfx_sounds_powerup16.wav" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Sprites.py" beforeDir="false" afterPath="$PROJECT_DIR$/Sprites.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/__main__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coins" beforeDir="false" afterPath="$PROJECT_DIR$/coins" afterDir="false" />
@@ -40,7 +32,7 @@
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="ToolWindowStructure.ShowToolbar" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../project ШАГ/__main__.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="preferences.editor" />
   </component>
   <component name="RecentsManager">

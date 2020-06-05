@@ -1,10 +1,7 @@
-# Game by - Adeon18
+# Game by - Adeon18(Trush Ostap)
 # Sound and Music - @romanpelino
 # Art from Kenney.nl
 
-import pygame
-import random
-from settings import *
 from Sprites import *
 from os import path
 
@@ -462,7 +459,6 @@ class Game:
                             waiting = False
                             self.running = False
                             self.button_sound.play()
-        # Draw the coin count
         pygame.display.flip()
         wait_for_key_goscr()
         pygame.mixer.music.fadeout(1000)
