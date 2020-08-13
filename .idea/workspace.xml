@@ -2,12 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4afb16a7-f2ef-4604-b7de-85a7a2e01c2a" name="Default Changelist" comment="FIXED a minor mistake">
+      <change beforePath="$PROJECT_DIR$/.idea/Python jumper.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Python jumper.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sprites.py" beforeDir="false" afterPath="$PROJECT_DIR$/Sprites.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/__main__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coins" beforeDir="false" afterPath="$PROJECT_DIR$/coins" afterDir="false" />
     </list>
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -29,28 +28,22 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1Pn8bDY8yPTLKBEakeJiK5sWSi8" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
   <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="ToolWindowStructure.ShowToolbar" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="preferences.editor" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\user\Desktop\Pyton\Python jumper" />
     </key>
-  </component>
-  <component name="RunDashboard">
-    <option name="ruleStates">
-      <list>
-        <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
-        </RuleState>
-        <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
-        </RuleState>
-      </list>
-    </option>
   </component>
   <component name="RunManager" selected="Python.__main__">
     <configuration name="Crossfade" type="PythonConfigurationType" factoryName="Python" temporary="true">
@@ -140,9 +133,9 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.__main__" />
+        <item itemvalue="Python.__main__ (1)" />
         <item itemvalue="Python.Sprites" />
         <item itemvalue="Python.Crossfade" />
-        <item itemvalue="Python.__main__ (1)" />
         <item itemvalue="Python.Sprites" />
       </list>
     </recent_temporary>
@@ -173,17 +166,26 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State>
-              <option name="COLUMN_ORDER" />
-            </State>
+            <State />
           </value>
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="FIXED a minor mistake" />
     <option name="LAST_COMMIT_MESSAGE" value="FIXED a minor mistake" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="520" y="347" key="FileChooserDialogImpl" timestamp="1595511007233">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="520" y="347" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1595511007233" />
+    <state x="461" y="164" key="SettingsEditor" timestamp="1595511039353">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="461" y="164" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1595511039353" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
