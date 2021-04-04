@@ -4,13 +4,13 @@ WIDTH = 480
 HEIGHT = 600
 FPS = 60
 FONT_NAME = 'fonts/AmaticSC-Regular'
-SAVES_FILE = 'Saves'
+SAVES_FILE = 'saves'
 COIN_FILE = 'coins'
 SPRITESHEET1 = 'spritesheet_jumper.png'
 
 # Player properties
-PLAYER_ACC = 0.5
-PLAYER_FLY_ACC = 1
+PLAYER_ACC = 0.8
+PLAYER_FLY_ACC = 1.2
 PLAYER_FRICTION = -0.12
 PLAYER_FRICTION_ON_SNOW = -0.04
 PLAYER_FRICTION_ON_SAND = -0.18
